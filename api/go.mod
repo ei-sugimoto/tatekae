@@ -1,8 +1,11 @@
 module github.com/ei-sugimoto/tatekae/api
 
-go 1.21.10
+go 1.23.1
 
-require github.com/gin-gonic/gin v1.10.0
+require (
+	entgo.io/ent v0.14.1
+	github.com/gin-gonic/gin v1.10.0
+)
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
@@ -27,7 +30,7 @@ require (
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/sys v0.23.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
