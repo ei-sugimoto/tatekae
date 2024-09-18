@@ -1,4 +1,16 @@
 services:
+  db:
+    image: mysql:8.1
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db:/var/lib/mysql
+
   api:
     build:
       context: ./api
@@ -7,3 +19,14 @@ services:
       - "8080:8080"
     volumes:
       - ./api:/app
+    environment:
+      - DB_HOST=db
+      - DB_USER=user
+      - DB_PASS=password
+      - DB_NAME=mydb
+      - DB_PORT=3306
+    depends_on:
+      - db
+
+volumes:
+  db:

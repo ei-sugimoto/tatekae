@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/dialect"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/migrate"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type DB struct {
