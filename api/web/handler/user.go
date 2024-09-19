@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/ei-sugimoto/tatekae/api/model"
+	"github.com/ei-sugimoto/tatekae/api/pkg"
 	"github.com/ei-sugimoto/tatekae/api/usecase"
 	"github.com/gin-gonic/gin"
 )
@@ -25,9 +26,7 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
+	Token string `json:"token"`
 }
 
 func (h *UserHandler) Register(c *gin.Context) {
@@ -50,10 +49,13 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(201, RegisterResponse{
-		ID:       res.ID,
-		Username: res.Username,
-		Email:    res.Email,
-	})
+	token, err := pkg.NewToken(res)
+
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(201, RegisterResponse{Token: token})
 
 }
