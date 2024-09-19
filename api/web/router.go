@@ -3,6 +3,9 @@ package web
 import (
 	"os"
 
+	"github.com/ei-sugimoto/tatekae/api/infrastructure"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/persistence"
+	"github.com/ei-sugimoto/tatekae/api/usecase"
 	"github.com/ei-sugimoto/tatekae/api/web/handler"
 	"github.com/gin-gonic/gin"
 )
@@ -29,8 +32,16 @@ func (r *Router) Run() {
 
 func (r *Router) SetRouting() {
 	healthHandler := handler.NewHealthHandler()
+	db := infrastructure.NewDB()
+	userPersistence := persistence.NewPersistUser(db)
+	userUsecase := usecase.NewUserUsecase(userPersistence)
+	userHandler := handler.NewUserHandler(userUsecase)
+
+	db.Migrate()
+
 	v1 := r.Engine.Group("/v1")
 	{
 		v1.GET("/health", healthHandler.StatusOK)
+		v1.POST("/user/register", userHandler.Register)
 	}
 }
