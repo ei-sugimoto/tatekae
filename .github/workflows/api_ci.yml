@@ -1,17 +1,16 @@
-name: API CI
+name: CI
 
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    working-directory: ./api
 
     steps:
       - name: Checkout code
@@ -34,12 +33,16 @@ jobs:
 
       - name: Install dependencies
         run: go mod download
+        working-directory: ./api
 
       - name: Build
         run: go build -v ./...
+        working-directory: ./api
 
       - name: Run tests
         run: go test -v ./...
+        working-directory: ./api
 
       - name: Run Lint
         run: go vet ./...
+        working-directory: ./api
