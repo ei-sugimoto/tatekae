@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    working-directory: ./api
 
     steps:
       - name: Checkout code
