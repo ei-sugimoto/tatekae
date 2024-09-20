@@ -1,53 +1,69 @@
 package web
 
 import (
+	"log"
+	"net"
 	"os"
+	"os/signal"
 
 	"github.com/ei-sugimoto/tatekae/api/infrastructure"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/persistence"
 	"github.com/ei-sugimoto/tatekae/api/usecase"
+	userpb "github.com/ei-sugimoto/tatekae/api/web/gen"
 	"github.com/ei-sugimoto/tatekae/api/web/handler"
-	"github.com/ei-sugimoto/tatekae/api/web/middleware"
-	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 )
 
 type Router struct {
-	Engine *gin.Engine
+	Engine *grpc.Server
 	Port   string
 }
 
 func NewRouter() *Router {
-	engine := gin.Default()
+	engine := grpc.NewServer()
 	return &Router{Engine: engine}
 }
 
 func (r *Router) Run() {
+
+	db := infrastructure.NewDB()
+
+	db.Migrate()
+
 	if port := os.Getenv("PORT"); port == "" {
 		r.Port = ":8080"
 	} else {
 		r.Port = ":" + port
 	}
-	r.SetRouting()
-	r.Engine.Run(r.Port)
+	listener, err := net.Listen("tcp", r.Port)
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+
+		log.Println("Server is running on port", r.Port)
+		if err := r.Engine.Serve(listener); err != nil {
+			log.Fatalf("Failed to serve: %v", err)
+		}
+
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	log.Println("Shutting down server...")
+	r.Engine.GracefulStop()
+
 }
 
-func (r *Router) SetRouting() {
-	healthHandler := handler.NewHealthHandler()
+func (r *Router) NewUserService() {
+
 	db := infrastructure.NewDB()
 	userPersistence := persistence.NewPersistUser(db)
 	userUsecase := usecase.NewUserUsecase(userPersistence)
 	userHandler := handler.NewUserHandler(userUsecase)
 
-	db.Migrate()
+	userpb.RegisterUserServiceServer(r.Engine, userHandler.Userpb)
 
-	v1 := r.Engine.Group("/v1")
-	{
-		v1.GET("/health", healthHandler.StatusOK)
-		v1.POST("/user/register", userHandler.Register)
-		v1.POST("/user/login", userHandler.Login)
-	}
-	authed := r.Engine.Group("/v1")
-	authed.Use(middleware.Auth)
-	{
-	}
 }

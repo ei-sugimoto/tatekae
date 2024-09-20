@@ -6,7 +6,7 @@ EXPOSE 8080
 
 COPY . .
 
-RUN go mod download
+RUN go env -w GOPROXY=https://goproxy.io,direct && go mod download
 
 RUN go install github.com/air-verse/air@latest
 
