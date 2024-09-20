@@ -7,7 +7,7 @@ import (
 	"github.com/ei-sugimoto/tatekae/api/model"
 	"github.com/ei-sugimoto/tatekae/api/pkg"
 	"github.com/ei-sugimoto/tatekae/api/usecase"
-	proto "github.com/ei-sugimoto/tatekae/api/web/gen"
+	"github.com/ei-sugimoto/tatekae/api/web/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

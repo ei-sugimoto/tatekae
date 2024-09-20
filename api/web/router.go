@@ -9,9 +9,9 @@ import (
 	"github.com/ei-sugimoto/tatekae/api/infrastructure"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/persistence"
 	"github.com/ei-sugimoto/tatekae/api/usecase"
-	userpb "github.com/ei-sugimoto/tatekae/api/web/gen"
 	"github.com/ei-sugimoto/tatekae/api/web/handler"
 	"github.com/ei-sugimoto/tatekae/api/web/middleware"
+	"github.com/ei-sugimoto/tatekae/api/web/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -74,6 +74,6 @@ func (r *Router) NewUserService() {
 	userUsecase := usecase.NewUserUsecase(userPersistence)
 	userHandler := handler.NewUserHandler(userUsecase)
 
-	userpb.RegisterUserServiceServer(r.Engine, userHandler)
+	proto.RegisterUserServiceServer(r.Engine, userHandler)
 
 }
