@@ -12,6 +12,7 @@ import (
 	userpb "github.com/ei-sugimoto/tatekae/api/web/gen"
 	"github.com/ei-sugimoto/tatekae/api/web/handler"
 	"google.golang.org/grpc"
+    
 )
 
 type Router struct {
@@ -20,7 +21,11 @@ type Router struct {
 }
 
 func NewRouter() *Router {
-	engine := grpc.NewServer()
+	engine := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			
+		)
+	)
 	return &Router{Engine: engine}
 }
 
@@ -39,6 +44,8 @@ func (r *Router) Run() {
 	if err != nil {
 		panic(err)
 	}
+
+	r.NewUserService()
 
 	go func() {
 
@@ -64,6 +71,6 @@ func (r *Router) NewUserService() {
 	userUsecase := usecase.NewUserUsecase(userPersistence)
 	userHandler := handler.NewUserHandler(userUsecase)
 
-	userpb.RegisterUserServiceServer(r.Engine, userHandler.Userpb)
+	userpb.RegisterUserServiceServer(r.Engine, userHandler)
 
 }

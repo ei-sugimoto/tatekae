@@ -15,14 +15,12 @@ import (
 type UserHandler struct {
 	UserUsecase usecase.IUserUsecase
 
-	Userpb proto.UnimplementedUserServiceServer
+	proto.UnimplementedUserServiceServer
 }
 
 func NewUserHandler(userusecase usecase.IUserUsecase) *UserHandler {
-	userpb := proto.UnimplementedUserServiceServer{}
 	return &UserHandler{
 		UserUsecase: userusecase,
-		Userpb:      userpb,
 	}
 }
 
@@ -36,6 +34,7 @@ func (h *UserHandler) Register(c context.Context, req *proto.RegisterRequest) (*
 
 	res, err := h.UserUsecase.Create(newUser)
 	if err != nil {
+
 		return nil, status.Errorf(codes.Internal, "failed to create user: %v", err)
 	}
 
