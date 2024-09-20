@@ -11,8 +11,9 @@ import (
 	"github.com/ei-sugimoto/tatekae/api/usecase"
 	userpb "github.com/ei-sugimoto/tatekae/api/web/gen"
 	"github.com/ei-sugimoto/tatekae/api/web/handler"
+	"github.com/ei-sugimoto/tatekae/api/web/middleware"
 	"google.golang.org/grpc"
-    
+	"google.golang.org/grpc/reflection"
 )
 
 type Router struct {
@@ -23,8 +24,8 @@ type Router struct {
 func NewRouter() *Router {
 	engine := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			
-		)
+			middleware.UnaryLoggingInterceptor(),
+		),
 	)
 	return &Router{Engine: engine}
 }
@@ -46,6 +47,8 @@ func (r *Router) Run() {
 	}
 
 	r.NewUserService()
+
+	reflection.Register(r.Engine)
 
 	go func() {
 
