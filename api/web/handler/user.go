@@ -59,3 +59,30 @@ func (h *UserHandler) Register(c *gin.Context) {
 	c.JSON(201, RegisterResponse{Token: token})
 
 }
+
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+func (h *UserHandler) Login(c *gin.Context) {
+	var req LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := h.UserUsecase.Login(req.Email, req.Password)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Err})
+		return
+	}
+
+	token, TokenErr := pkg.NewToken(user)
+	if TokenErr != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, RegisterResponse{Token: token})
+}

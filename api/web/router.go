@@ -7,6 +7,7 @@ import (
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/persistence"
 	"github.com/ei-sugimoto/tatekae/api/usecase"
 	"github.com/ei-sugimoto/tatekae/api/web/handler"
+	"github.com/ei-sugimoto/tatekae/api/web/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -43,5 +44,10 @@ func (r *Router) SetRouting() {
 	{
 		v1.GET("/health", healthHandler.StatusOK)
 		v1.POST("/user/register", userHandler.Register)
+		v1.POST("/user/login", userHandler.Login)
+	}
+	authed := r.Engine.Group("/v1")
+	authed.Use(middleware.Auth)
+	{
 	}
 }
