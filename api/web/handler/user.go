@@ -49,7 +49,7 @@ func (h *UserHandler) Register(c context.Context, req *proto.RegisterRequest) (*
 
 func (h *UserHandler) Login(c context.Context, req *proto.LoginRequest) (*proto.LoginResponse, error) {
 	user, err := h.UserUsecase.Login(req.Email, req.Password)
-	if err.Err != nil {
+	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create user: %v", err.Err)
 	}
 

@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/ei-sugimoto/tatekae/api/infrastructure"
@@ -65,7 +66,7 @@ func (p *PersistUser) Get(id int) (*model.User, *pkg.CustomErr) {
 
 func (p *PersistUser) Login(email, password string) (*model.User, *pkg.CustomErr) {
 	ctx := context.Background()
-	res, err := p.db.User.Query().Where(user.Or(user.Email(email), user.Password(password))).Only(ctx)
+	res, err := p.db.User.Query().Where(user.And(user.Email(email), user.Password(password))).Only(ctx)
 	if err != nil {
 		return nil, &pkg.CustomErr{
 			Code: 500,
@@ -73,7 +74,7 @@ func (p *PersistUser) Login(email, password string) (*model.User, *pkg.CustomErr
 		}
 	}
 
-	if res == nil {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, &pkg.CustomErr{
 			Code: 404,
 			Err:  errors.New("user not found"),
