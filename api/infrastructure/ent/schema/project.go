@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -19,5 +20,7 @@ func (Project) Fields() []ent.Field {
 
 // Edges of the Project.
 func (Project) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("users", User.Type),
+	}
 }
