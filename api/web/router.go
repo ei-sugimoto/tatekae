@@ -25,6 +25,7 @@ func NewRouter() *Router {
 	engine := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			middleware.UnaryLoggingInterceptor(),
+			middleware.AuthUnaryInterceptor,
 		),
 	)
 	return &Router{Engine: engine}
@@ -47,6 +48,7 @@ func (r *Router) Run() {
 	}
 
 	r.NewUserService()
+	r.NewProjectService()
 
 	reflection.Register(r.Engine)
 
@@ -75,5 +77,16 @@ func (r *Router) NewUserService() {
 	userHandler := handler.NewUserHandler(userUsecase)
 
 	proto.RegisterUserServiceServer(r.Engine, userHandler)
+
+}
+
+func (r *Router) NewProjectService() {
+
+	db := infrastructure.NewDB()
+	projectPersistence := persistence.NewPersistProject(db)
+	projectUsecase := usecase.NewProjectUsecase(projectPersistence)
+	projectHandler := handler.NewProjectHandler(projectUsecase)
+
+	proto.RegisterProjectServiceServer(r.Engine, projectHandler)
 
 }

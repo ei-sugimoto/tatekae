@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package protoProject;
 
-option go_package = "github.com/ei-sugimoto/tatekae/api/proto";
+option go_package = "./proto";
 
 service ProjectService {
     rpc Create(CreateRequest) returns (CreateResponse);
