@@ -159,7 +159,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if uu.mutation.ProjectsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   user.ProjectsTable,
 			Columns: user.ProjectsPrimaryKey,
 			Bidi:    false,
@@ -172,7 +172,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := uu.mutation.RemovedProjectsIDs(); len(nodes) > 0 && !uu.mutation.ProjectsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   user.ProjectsTable,
 			Columns: user.ProjectsPrimaryKey,
 			Bidi:    false,
@@ -188,7 +188,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := uu.mutation.ProjectsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   user.ProjectsTable,
 			Columns: user.ProjectsPrimaryKey,
 			Bidi:    false,
@@ -382,7 +382,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if uuo.mutation.ProjectsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   user.ProjectsTable,
 			Columns: user.ProjectsPrimaryKey,
 			Bidi:    false,
@@ -395,7 +395,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if nodes := uuo.mutation.RemovedProjectsIDs(); len(nodes) > 0 && !uuo.mutation.ProjectsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   user.ProjectsTable,
 			Columns: user.ProjectsPrimaryKey,
 			Bidi:    false,
@@ -411,7 +411,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if nodes := uuo.mutation.ProjectsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   user.ProjectsTable,
 			Columns: user.ProjectsPrimaryKey,
 			Bidi:    false,

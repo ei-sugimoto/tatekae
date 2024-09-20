@@ -15,6 +15,8 @@ type Project struct {
 func (Project) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
+		field.Time("created_at").Immutable(),
+		field.Int("created_by"),
 	}
 }
 

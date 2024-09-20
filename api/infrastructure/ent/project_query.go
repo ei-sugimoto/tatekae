@@ -75,7 +75,7 @@ func (pq *ProjectQuery) QueryUsers() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(project.Table, project.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, project.UsersTable, project.UsersPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, project.UsersTable, project.UsersPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -416,10 +416,10 @@ func (pq *ProjectQuery) loadUsers(ctx context.Context, query *UserQuery, nodes [
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(project.UsersTable)
-		s.Join(joinT).On(s.C(user.FieldID), joinT.C(project.UsersPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(project.UsersPrimaryKey[1]), edgeIDs...))
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(project.UsersPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(project.UsersPrimaryKey[0]), edgeIDs...))
 		columns := s.SelectedColumns()
-		s.Select(joinT.C(project.UsersPrimaryKey[1]))
+		s.Select(joinT.C(project.UsersPrimaryKey[0]))
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})

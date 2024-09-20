@@ -75,7 +75,7 @@ func (uq *UserQuery) QueryProjects() *ProjectQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.ProjectsTable, user.ProjectsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.ProjectsTable, user.ProjectsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -416,10 +416,10 @@ func (uq *UserQuery) loadProjects(ctx context.Context, query *ProjectQuery, node
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(user.ProjectsTable)
-		s.Join(joinT).On(s.C(project.FieldID), joinT.C(user.ProjectsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(user.ProjectsPrimaryKey[0]), edgeIDs...))
+		s.Join(joinT).On(s.C(project.FieldID), joinT.C(user.ProjectsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(user.ProjectsPrimaryKey[1]), edgeIDs...))
 		columns := s.SelectedColumns()
-		s.Select(joinT.C(user.ProjectsPrimaryKey[0]))
+		s.Select(joinT.C(user.ProjectsPrimaryKey[1]))
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})

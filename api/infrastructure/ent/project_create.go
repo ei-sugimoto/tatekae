@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -23,6 +24,18 @@ type ProjectCreate struct {
 // SetName sets the "name" field.
 func (pc *ProjectCreate) SetName(s string) *ProjectCreate {
 	pc.mutation.SetName(s)
+	return pc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (pc *ProjectCreate) SetCreatedAt(t time.Time) *ProjectCreate {
+	pc.mutation.SetCreatedAt(t)
+	return pc
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (pc *ProjectCreate) SetCreatedBy(i int) *ProjectCreate {
+	pc.mutation.SetCreatedBy(i)
 	return pc
 }
 
@@ -78,6 +91,12 @@ func (pc *ProjectCreate) check() error {
 	if _, ok := pc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Project.name"`)}
 	}
+	if _, ok := pc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Project.created_at"`)}
+	}
+	if _, ok := pc.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`ent: missing required field "Project.created_by"`)}
+	}
 	return nil
 }
 
@@ -108,10 +127,18 @@ func (pc *ProjectCreate) createSpec() (*Project, *sqlgraph.CreateSpec) {
 		_spec.SetField(project.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
+	if value, ok := pc.mutation.CreatedAt(); ok {
+		_spec.SetField(project.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := pc.mutation.CreatedBy(); ok {
+		_spec.SetField(project.FieldCreatedBy, field.TypeInt, value)
+		_node.CreatedBy = value
+	}
 	if nodes := pc.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,

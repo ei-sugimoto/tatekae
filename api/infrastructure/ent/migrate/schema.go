@@ -12,6 +12,8 @@ var (
 	ProjectsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "created_by", Type: field.TypeInt},
 	}
 	// ProjectsTable holds the schema information for the "projects" table.
 	ProjectsTable = &schema.Table{
@@ -33,27 +35,27 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
-	// UserProjectsColumns holds the columns for the "user_projects" table.
-	UserProjectsColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeInt},
+	// ProjectUsersColumns holds the columns for the "project_users" table.
+	ProjectUsersColumns = []*schema.Column{
 		{Name: "project_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt},
 	}
-	// UserProjectsTable holds the schema information for the "user_projects" table.
-	UserProjectsTable = &schema.Table{
-		Name:       "user_projects",
-		Columns:    UserProjectsColumns,
-		PrimaryKey: []*schema.Column{UserProjectsColumns[0], UserProjectsColumns[1]},
+	// ProjectUsersTable holds the schema information for the "project_users" table.
+	ProjectUsersTable = &schema.Table{
+		Name:       "project_users",
+		Columns:    ProjectUsersColumns,
+		PrimaryKey: []*schema.Column{ProjectUsersColumns[0], ProjectUsersColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "user_projects_user_id",
-				Columns:    []*schema.Column{UserProjectsColumns[0]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				Symbol:     "project_users_project_id",
+				Columns:    []*schema.Column{ProjectUsersColumns[0]},
+				RefColumns: []*schema.Column{ProjectsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "user_projects_project_id",
-				Columns:    []*schema.Column{UserProjectsColumns[1]},
-				RefColumns: []*schema.Column{ProjectsColumns[0]},
+				Symbol:     "project_users_user_id",
+				Columns:    []*schema.Column{ProjectUsersColumns[1]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -62,11 +64,11 @@ var (
 	Tables = []*schema.Table{
 		ProjectsTable,
 		UsersTable,
-		UserProjectsTable,
+		ProjectUsersTable,
 	}
 )
 
 func init() {
-	UserProjectsTable.ForeignKeys[0].RefTable = UsersTable
-	UserProjectsTable.ForeignKeys[1].RefTable = ProjectsTable
+	ProjectUsersTable.ForeignKeys[0].RefTable = ProjectsTable
+	ProjectUsersTable.ForeignKeys[1].RefTable = UsersTable
 }

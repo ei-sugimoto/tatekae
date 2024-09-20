@@ -36,6 +36,9 @@ type ProjectMutation struct {
 	typ           string
 	id            *int
 	name          *string
+	created_at    *time.Time
+	created_by    *int
+	addcreated_by *int
 	clearedFields map[string]struct{}
 	users         map[int]struct{}
 	removedusers  map[int]struct{}
@@ -179,6 +182,98 @@ func (m *ProjectMutation) ResetName() {
 	m.name = nil
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (m *ProjectMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ProjectMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Project entity.
+// If the Project object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProjectMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ProjectMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (m *ProjectMutation) SetCreatedBy(i int) {
+	m.created_by = &i
+	m.addcreated_by = nil
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *ProjectMutation) CreatedBy() (r int, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the Project entity.
+// If the Project object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProjectMutation) OldCreatedBy(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// AddCreatedBy adds i to the "created_by" field.
+func (m *ProjectMutation) AddCreatedBy(i int) {
+	if m.addcreated_by != nil {
+		*m.addcreated_by += i
+	} else {
+		m.addcreated_by = &i
+	}
+}
+
+// AddedCreatedBy returns the value that was added to the "created_by" field in this mutation.
+func (m *ProjectMutation) AddedCreatedBy() (r int, exists bool) {
+	v := m.addcreated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *ProjectMutation) ResetCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+}
+
 // AddUserIDs adds the "users" edge to the User entity by ids.
 func (m *ProjectMutation) AddUserIDs(ids ...int) {
 	if m.users == nil {
@@ -267,9 +362,15 @@ func (m *ProjectMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProjectMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 3)
 	if m.name != nil {
 		fields = append(fields, project.FieldName)
+	}
+	if m.created_at != nil {
+		fields = append(fields, project.FieldCreatedAt)
+	}
+	if m.created_by != nil {
+		fields = append(fields, project.FieldCreatedBy)
 	}
 	return fields
 }
@@ -281,6 +382,10 @@ func (m *ProjectMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case project.FieldName:
 		return m.Name()
+	case project.FieldCreatedAt:
+		return m.CreatedAt()
+	case project.FieldCreatedBy:
+		return m.CreatedBy()
 	}
 	return nil, false
 }
@@ -292,6 +397,10 @@ func (m *ProjectMutation) OldField(ctx context.Context, name string) (ent.Value,
 	switch name {
 	case project.FieldName:
 		return m.OldName(ctx)
+	case project.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case project.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
 	}
 	return nil, fmt.Errorf("unknown Project field %s", name)
 }
@@ -308,6 +417,20 @@ func (m *ProjectMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case project.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case project.FieldCreatedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Project field %s", name)
 }
@@ -315,13 +438,21 @@ func (m *ProjectMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *ProjectMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addcreated_by != nil {
+		fields = append(fields, project.FieldCreatedBy)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *ProjectMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case project.FieldCreatedBy:
+		return m.AddedCreatedBy()
+	}
 	return nil, false
 }
 
@@ -330,6 +461,13 @@ func (m *ProjectMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *ProjectMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case project.FieldCreatedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedBy(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Project numeric field %s", name)
 }
@@ -359,6 +497,12 @@ func (m *ProjectMutation) ResetField(name string) error {
 	switch name {
 	case project.FieldName:
 		m.ResetName()
+		return nil
+	case project.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case project.FieldCreatedBy:
+		m.ResetCreatedBy()
 		return nil
 	}
 	return fmt.Errorf("unknown Project field %s", name)

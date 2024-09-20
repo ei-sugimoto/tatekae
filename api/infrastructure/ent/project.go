@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,6 +19,10 @@ type Project struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy int `json:"created_by,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProjectQuery when eager-loading is set.
 	Edges        ProjectEdges `json:"edges"`
@@ -47,10 +52,12 @@ func (*Project) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case project.FieldID:
+		case project.FieldID, project.FieldCreatedBy:
 			values[i] = new(sql.NullInt64)
 		case project.FieldName:
 			values[i] = new(sql.NullString)
+		case project.FieldCreatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -77,6 +84,18 @@ func (pr *Project) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				pr.Name = value.String
+			}
+		case project.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				pr.CreatedAt = value.Time
+			}
+		case project.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				pr.CreatedBy = int(value.Int64)
 			}
 		default:
 			pr.selectValues.Set(columns[i], values[i])
@@ -121,6 +140,12 @@ func (pr *Project) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", pr.ID))
 	builder.WriteString("name=")
 	builder.WriteString(pr.Name)
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(pr.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", pr.CreatedBy))
 	builder.WriteByte(')')
 	return builder.String()
 }

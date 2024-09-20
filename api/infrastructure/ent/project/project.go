@@ -14,12 +14,16 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
 	// Table holds the table name of the project in the database.
 	Table = "projects"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
-	UsersTable = "user_projects"
+	UsersTable = "project_users"
 	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UsersInverseTable = "users"
@@ -29,12 +33,14 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldCreatedAt,
+	FieldCreatedBy,
 }
 
 var (
 	// UsersPrimaryKey and UsersColumn2 are the table columns denoting the
 	// primary key for the users relation (M2M).
-	UsersPrimaryKey = []string{"user_id", "project_id"}
+	UsersPrimaryKey = []string{"project_id", "user_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -60,6 +66,16 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
 // ByUsersCount orders the results by users count.
 func ByUsersCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -77,6 +93,6 @@ func newUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UsersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, UsersTable, UsersPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2M, false, UsersTable, UsersPrimaryKey...),
 	)
 }

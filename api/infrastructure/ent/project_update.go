@@ -42,6 +42,27 @@ func (pu *ProjectUpdate) SetNillableName(s *string) *ProjectUpdate {
 	return pu
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (pu *ProjectUpdate) SetCreatedBy(i int) *ProjectUpdate {
+	pu.mutation.ResetCreatedBy()
+	pu.mutation.SetCreatedBy(i)
+	return pu
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (pu *ProjectUpdate) SetNillableCreatedBy(i *int) *ProjectUpdate {
+	if i != nil {
+		pu.SetCreatedBy(*i)
+	}
+	return pu
+}
+
+// AddCreatedBy adds i to the "created_by" field.
+func (pu *ProjectUpdate) AddCreatedBy(i int) *ProjectUpdate {
+	pu.mutation.AddCreatedBy(i)
+	return pu
+}
+
 // AddUserIDs adds the "users" edge to the User entity by IDs.
 func (pu *ProjectUpdate) AddUserIDs(ids ...int) *ProjectUpdate {
 	pu.mutation.AddUserIDs(ids...)
@@ -122,10 +143,16 @@ func (pu *ProjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := pu.mutation.Name(); ok {
 		_spec.SetField(project.FieldName, field.TypeString, value)
 	}
+	if value, ok := pu.mutation.CreatedBy(); ok {
+		_spec.SetField(project.FieldCreatedBy, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(project.FieldCreatedBy, field.TypeInt, value)
+	}
 	if pu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,
@@ -138,7 +165,7 @@ func (pu *ProjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := pu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !pu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,
@@ -154,7 +181,7 @@ func (pu *ProjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := pu.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,
@@ -198,6 +225,27 @@ func (puo *ProjectUpdateOne) SetNillableName(s *string) *ProjectUpdateOne {
 	if s != nil {
 		puo.SetName(*s)
 	}
+	return puo
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (puo *ProjectUpdateOne) SetCreatedBy(i int) *ProjectUpdateOne {
+	puo.mutation.ResetCreatedBy()
+	puo.mutation.SetCreatedBy(i)
+	return puo
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (puo *ProjectUpdateOne) SetNillableCreatedBy(i *int) *ProjectUpdateOne {
+	if i != nil {
+		puo.SetCreatedBy(*i)
+	}
+	return puo
+}
+
+// AddCreatedBy adds i to the "created_by" field.
+func (puo *ProjectUpdateOne) AddCreatedBy(i int) *ProjectUpdateOne {
+	puo.mutation.AddCreatedBy(i)
 	return puo
 }
 
@@ -311,10 +359,16 @@ func (puo *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err e
 	if value, ok := puo.mutation.Name(); ok {
 		_spec.SetField(project.FieldName, field.TypeString, value)
 	}
+	if value, ok := puo.mutation.CreatedBy(); ok {
+		_spec.SetField(project.FieldCreatedBy, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(project.FieldCreatedBy, field.TypeInt, value)
+	}
 	if puo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,
@@ -327,7 +381,7 @@ func (puo *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err e
 	if nodes := puo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !puo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,
@@ -343,7 +397,7 @@ func (puo *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err e
 	if nodes := puo.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,
