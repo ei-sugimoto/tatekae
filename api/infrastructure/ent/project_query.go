@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/bill"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/predicate"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/project"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/user"
@@ -24,6 +25,7 @@ type ProjectQuery struct {
 	order      []project.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Project
+	withBills  *BillQuery
 	withUsers  *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -61,6 +63,28 @@ func (pq *ProjectQuery) Order(o ...project.OrderOption) *ProjectQuery {
 	return pq
 }
 
+// QueryBills chains the current query on the "bills" edge.
+func (pq *ProjectQuery) QueryBills() *BillQuery {
+	query := (&BillClient{config: pq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(project.Table, project.FieldID, selector),
+			sqlgraph.To(bill.Table, bill.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, project.BillsTable, project.BillsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryUsers chains the current query on the "users" edge.
 func (pq *ProjectQuery) QueryUsers() *UserQuery {
 	query := (&UserClient{config: pq.config}).Query()
@@ -75,7 +99,7 @@ func (pq *ProjectQuery) QueryUsers() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(project.Table, project.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, project.UsersTable, project.UsersPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, project.UsersTable, project.UsersPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -275,11 +299,23 @@ func (pq *ProjectQuery) Clone() *ProjectQuery {
 		order:      append([]project.OrderOption{}, pq.order...),
 		inters:     append([]Interceptor{}, pq.inters...),
 		predicates: append([]predicate.Project{}, pq.predicates...),
+		withBills:  pq.withBills.Clone(),
 		withUsers:  pq.withUsers.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
 	}
+}
+
+// WithBills tells the query-builder to eager-load the nodes that are connected to
+// the "bills" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProjectQuery) WithBills(opts ...func(*BillQuery)) *ProjectQuery {
+	query := (&BillClient{config: pq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withBills = query
+	return pq
 }
 
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
@@ -371,7 +407,8 @@ func (pq *ProjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Proj
 	var (
 		nodes       = []*Project{}
 		_spec       = pq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
+			pq.withBills != nil,
 			pq.withUsers != nil,
 		}
 	)
@@ -393,6 +430,13 @@ func (pq *ProjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Proj
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := pq.withBills; query != nil {
+		if err := pq.loadBills(ctx, query, nodes,
+			func(n *Project) { n.Edges.Bills = []*Bill{} },
+			func(n *Project, e *Bill) { n.Edges.Bills = append(n.Edges.Bills, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := pq.withUsers; query != nil {
 		if err := pq.loadUsers(ctx, query, nodes,
 			func(n *Project) { n.Edges.Users = []*User{} },
@@ -403,6 +447,37 @@ func (pq *ProjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Proj
 	return nodes, nil
 }
 
+func (pq *ProjectQuery) loadBills(ctx context.Context, query *BillQuery, nodes []*Project, init func(*Project), assign func(*Project, *Bill)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Project)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Bill(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(project.BillsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.project_bills
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "project_bills" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "project_bills" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 func (pq *ProjectQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*Project, init func(*Project), assign func(*Project, *User)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*Project)
@@ -416,10 +491,10 @@ func (pq *ProjectQuery) loadUsers(ctx context.Context, query *UserQuery, nodes [
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(project.UsersTable)
-		s.Join(joinT).On(s.C(user.FieldID), joinT.C(project.UsersPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(project.UsersPrimaryKey[1]), edgeIDs...))
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(project.UsersPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(project.UsersPrimaryKey[0]), edgeIDs...))
 		columns := s.SelectedColumns()
-		s.Select(joinT.C(project.UsersPrimaryKey[1]))
+		s.Select(joinT.C(project.UsersPrimaryKey[0]))
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})

@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/bill"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/user"
 )
 
@@ -35,9 +36,13 @@ type User struct {
 type UserEdges struct {
 	// Projects holds the value of the projects edge.
 	Projects []*Project `json:"projects,omitempty"`
+	// SrcBill holds the value of the src_bill edge.
+	SrcBill *Bill `json:"src_bill,omitempty"`
+	// DstBill holds the value of the dst_bill edge.
+	DstBill *Bill `json:"dst_bill,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // ProjectsOrErr returns the Projects value or an error if the edge
@@ -47,6 +52,28 @@ func (e UserEdges) ProjectsOrErr() ([]*Project, error) {
 		return e.Projects, nil
 	}
 	return nil, &NotLoadedError{edge: "projects"}
+}
+
+// SrcBillOrErr returns the SrcBill value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) SrcBillOrErr() (*Bill, error) {
+	if e.SrcBill != nil {
+		return e.SrcBill, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: bill.Label}
+	}
+	return nil, &NotLoadedError{edge: "src_bill"}
+}
+
+// DstBillOrErr returns the DstBill value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) DstBillOrErr() (*Bill, error) {
+	if e.DstBill != nil {
+		return e.DstBill, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: bill.Label}
+	}
+	return nil, &NotLoadedError{edge: "dst_bill"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -121,6 +148,16 @@ func (u *User) Value(name string) (ent.Value, error) {
 // QueryProjects queries the "projects" edge of the User entity.
 func (u *User) QueryProjects() *ProjectQuery {
 	return NewUserClient(u.config).QueryProjects(u)
+}
+
+// QuerySrcBill queries the "src_bill" edge of the User entity.
+func (u *User) QuerySrcBill() *BillQuery {
+	return NewUserClient(u.config).QuerySrcBill(u)
+}
+
+// QueryDstBill queries the "dst_bill" edge of the User entity.
+func (u *User) QueryDstBill() *BillQuery {
+	return NewUserClient(u.config).QueryDstBill(u)
 }
 
 // Update returns a builder for updating this User.

@@ -215,12 +215,35 @@ func CreatedByLTE(v int) predicate.Project {
 	return predicate.Project(sql.FieldLTE(FieldCreatedBy, v))
 }
 
+// HasBills applies the HasEdge predicate on the "bills" edge.
+func HasBills() predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, BillsTable, BillsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBillsWith applies the HasEdge predicate on the "bills" edge with a given conditions (other predicates).
+func HasBillsWith(preds ...predicate.Bill) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		step := newBillsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasUsers applies the HasEdge predicate on the "users" edge.
 func HasUsers() predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, UsersTable, UsersPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, UsersTable, UsersPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

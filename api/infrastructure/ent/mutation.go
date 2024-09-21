@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/bill"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/predicate"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/project"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/user"
@@ -25,9 +26,557 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeBill    = "Bill"
 	TypeProject = "Project"
 	TypeUser    = "User"
 )
+
+// BillMutation represents an operation that mutates the Bill nodes in the graph.
+type BillMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	price             *int
+	addprice          *int
+	clearedFields     map[string]struct{}
+	project_id        *int
+	clearedproject_id bool
+	src_user          *int
+	clearedsrc_user   bool
+	dst_user          *int
+	cleareddst_user   bool
+	done              bool
+	oldValue          func(context.Context) (*Bill, error)
+	predicates        []predicate.Bill
+}
+
+var _ ent.Mutation = (*BillMutation)(nil)
+
+// billOption allows management of the mutation configuration using functional options.
+type billOption func(*BillMutation)
+
+// newBillMutation creates new mutation for the Bill entity.
+func newBillMutation(c config, op Op, opts ...billOption) *BillMutation {
+	m := &BillMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBill,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBillID sets the ID field of the mutation.
+func withBillID(id int) billOption {
+	return func(m *BillMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Bill
+		)
+		m.oldValue = func(ctx context.Context) (*Bill, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Bill.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBill sets the old Bill of the mutation.
+func withBill(node *Bill) billOption {
+	return func(m *BillMutation) {
+		m.oldValue = func(context.Context) (*Bill, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BillMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BillMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BillMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BillMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Bill.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPrice sets the "price" field.
+func (m *BillMutation) SetPrice(i int) {
+	m.price = &i
+	m.addprice = nil
+}
+
+// Price returns the value of the "price" field in the mutation.
+func (m *BillMutation) Price() (r int, exists bool) {
+	v := m.price
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrice returns the old "price" field's value of the Bill entity.
+// If the Bill object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillMutation) OldPrice(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrice is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrice requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrice: %w", err)
+	}
+	return oldValue.Price, nil
+}
+
+// AddPrice adds i to the "price" field.
+func (m *BillMutation) AddPrice(i int) {
+	if m.addprice != nil {
+		*m.addprice += i
+	} else {
+		m.addprice = &i
+	}
+}
+
+// AddedPrice returns the value that was added to the "price" field in this mutation.
+func (m *BillMutation) AddedPrice() (r int, exists bool) {
+	v := m.addprice
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPrice resets all changes to the "price" field.
+func (m *BillMutation) ResetPrice() {
+	m.price = nil
+	m.addprice = nil
+}
+
+// SetProjectIDID sets the "project_id" edge to the Project entity by id.
+func (m *BillMutation) SetProjectIDID(id int) {
+	m.project_id = &id
+}
+
+// ClearProjectID clears the "project_id" edge to the Project entity.
+func (m *BillMutation) ClearProjectID() {
+	m.clearedproject_id = true
+}
+
+// ProjectIDCleared reports if the "project_id" edge to the Project entity was cleared.
+func (m *BillMutation) ProjectIDCleared() bool {
+	return m.clearedproject_id
+}
+
+// ProjectIDID returns the "project_id" edge ID in the mutation.
+func (m *BillMutation) ProjectIDID() (id int, exists bool) {
+	if m.project_id != nil {
+		return *m.project_id, true
+	}
+	return
+}
+
+// ProjectIDIDs returns the "project_id" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ProjectIDID instead. It exists only for internal usage by the builders.
+func (m *BillMutation) ProjectIDIDs() (ids []int) {
+	if id := m.project_id; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetProjectID resets all changes to the "project_id" edge.
+func (m *BillMutation) ResetProjectID() {
+	m.project_id = nil
+	m.clearedproject_id = false
+}
+
+// SetSrcUserID sets the "src_user" edge to the User entity by id.
+func (m *BillMutation) SetSrcUserID(id int) {
+	m.src_user = &id
+}
+
+// ClearSrcUser clears the "src_user" edge to the User entity.
+func (m *BillMutation) ClearSrcUser() {
+	m.clearedsrc_user = true
+}
+
+// SrcUserCleared reports if the "src_user" edge to the User entity was cleared.
+func (m *BillMutation) SrcUserCleared() bool {
+	return m.clearedsrc_user
+}
+
+// SrcUserID returns the "src_user" edge ID in the mutation.
+func (m *BillMutation) SrcUserID() (id int, exists bool) {
+	if m.src_user != nil {
+		return *m.src_user, true
+	}
+	return
+}
+
+// SrcUserIDs returns the "src_user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SrcUserID instead. It exists only for internal usage by the builders.
+func (m *BillMutation) SrcUserIDs() (ids []int) {
+	if id := m.src_user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSrcUser resets all changes to the "src_user" edge.
+func (m *BillMutation) ResetSrcUser() {
+	m.src_user = nil
+	m.clearedsrc_user = false
+}
+
+// SetDstUserID sets the "dst_user" edge to the User entity by id.
+func (m *BillMutation) SetDstUserID(id int) {
+	m.dst_user = &id
+}
+
+// ClearDstUser clears the "dst_user" edge to the User entity.
+func (m *BillMutation) ClearDstUser() {
+	m.cleareddst_user = true
+}
+
+// DstUserCleared reports if the "dst_user" edge to the User entity was cleared.
+func (m *BillMutation) DstUserCleared() bool {
+	return m.cleareddst_user
+}
+
+// DstUserID returns the "dst_user" edge ID in the mutation.
+func (m *BillMutation) DstUserID() (id int, exists bool) {
+	if m.dst_user != nil {
+		return *m.dst_user, true
+	}
+	return
+}
+
+// DstUserIDs returns the "dst_user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DstUserID instead. It exists only for internal usage by the builders.
+func (m *BillMutation) DstUserIDs() (ids []int) {
+	if id := m.dst_user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDstUser resets all changes to the "dst_user" edge.
+func (m *BillMutation) ResetDstUser() {
+	m.dst_user = nil
+	m.cleareddst_user = false
+}
+
+// Where appends a list predicates to the BillMutation builder.
+func (m *BillMutation) Where(ps ...predicate.Bill) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the BillMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *BillMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Bill, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *BillMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *BillMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Bill).
+func (m *BillMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BillMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.price != nil {
+		fields = append(fields, bill.FieldPrice)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BillMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case bill.FieldPrice:
+		return m.Price()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BillMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case bill.FieldPrice:
+		return m.OldPrice(ctx)
+	}
+	return nil, fmt.Errorf("unknown Bill field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BillMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case bill.FieldPrice:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrice(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Bill field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BillMutation) AddedFields() []string {
+	var fields []string
+	if m.addprice != nil {
+		fields = append(fields, bill.FieldPrice)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BillMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case bill.FieldPrice:
+		return m.AddedPrice()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BillMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case bill.FieldPrice:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPrice(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Bill numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BillMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BillMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BillMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Bill nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BillMutation) ResetField(name string) error {
+	switch name {
+	case bill.FieldPrice:
+		m.ResetPrice()
+		return nil
+	}
+	return fmt.Errorf("unknown Bill field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BillMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.project_id != nil {
+		edges = append(edges, bill.EdgeProjectID)
+	}
+	if m.src_user != nil {
+		edges = append(edges, bill.EdgeSrcUser)
+	}
+	if m.dst_user != nil {
+		edges = append(edges, bill.EdgeDstUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BillMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case bill.EdgeProjectID:
+		if id := m.project_id; id != nil {
+			return []ent.Value{*id}
+		}
+	case bill.EdgeSrcUser:
+		if id := m.src_user; id != nil {
+			return []ent.Value{*id}
+		}
+	case bill.EdgeDstUser:
+		if id := m.dst_user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BillMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BillMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BillMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedproject_id {
+		edges = append(edges, bill.EdgeProjectID)
+	}
+	if m.clearedsrc_user {
+		edges = append(edges, bill.EdgeSrcUser)
+	}
+	if m.cleareddst_user {
+		edges = append(edges, bill.EdgeDstUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BillMutation) EdgeCleared(name string) bool {
+	switch name {
+	case bill.EdgeProjectID:
+		return m.clearedproject_id
+	case bill.EdgeSrcUser:
+		return m.clearedsrc_user
+	case bill.EdgeDstUser:
+		return m.cleareddst_user
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BillMutation) ClearEdge(name string) error {
+	switch name {
+	case bill.EdgeProjectID:
+		m.ClearProjectID()
+		return nil
+	case bill.EdgeSrcUser:
+		m.ClearSrcUser()
+		return nil
+	case bill.EdgeDstUser:
+		m.ClearDstUser()
+		return nil
+	}
+	return fmt.Errorf("unknown Bill unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BillMutation) ResetEdge(name string) error {
+	switch name {
+	case bill.EdgeProjectID:
+		m.ResetProjectID()
+		return nil
+	case bill.EdgeSrcUser:
+		m.ResetSrcUser()
+		return nil
+	case bill.EdgeDstUser:
+		m.ResetDstUser()
+		return nil
+	}
+	return fmt.Errorf("unknown Bill edge %s", name)
+}
 
 // ProjectMutation represents an operation that mutates the Project nodes in the graph.
 type ProjectMutation struct {
@@ -40,6 +589,9 @@ type ProjectMutation struct {
 	created_by    *int
 	addcreated_by *int
 	clearedFields map[string]struct{}
+	bills         map[int]struct{}
+	removedbills  map[int]struct{}
+	clearedbills  bool
 	users         map[int]struct{}
 	removedusers  map[int]struct{}
 	clearedusers  bool
@@ -272,6 +824,60 @@ func (m *ProjectMutation) AddedCreatedBy() (r int, exists bool) {
 func (m *ProjectMutation) ResetCreatedBy() {
 	m.created_by = nil
 	m.addcreated_by = nil
+}
+
+// AddBillIDs adds the "bills" edge to the Bill entity by ids.
+func (m *ProjectMutation) AddBillIDs(ids ...int) {
+	if m.bills == nil {
+		m.bills = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.bills[ids[i]] = struct{}{}
+	}
+}
+
+// ClearBills clears the "bills" edge to the Bill entity.
+func (m *ProjectMutation) ClearBills() {
+	m.clearedbills = true
+}
+
+// BillsCleared reports if the "bills" edge to the Bill entity was cleared.
+func (m *ProjectMutation) BillsCleared() bool {
+	return m.clearedbills
+}
+
+// RemoveBillIDs removes the "bills" edge to the Bill entity by IDs.
+func (m *ProjectMutation) RemoveBillIDs(ids ...int) {
+	if m.removedbills == nil {
+		m.removedbills = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.bills, ids[i])
+		m.removedbills[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedBills returns the removed IDs of the "bills" edge to the Bill entity.
+func (m *ProjectMutation) RemovedBillsIDs() (ids []int) {
+	for id := range m.removedbills {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// BillsIDs returns the "bills" edge IDs in the mutation.
+func (m *ProjectMutation) BillsIDs() (ids []int) {
+	for id := range m.bills {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetBills resets all changes to the "bills" edge.
+func (m *ProjectMutation) ResetBills() {
+	m.bills = nil
+	m.clearedbills = false
+	m.removedbills = nil
 }
 
 // AddUserIDs adds the "users" edge to the User entity by ids.
@@ -510,7 +1116,10 @@ func (m *ProjectMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ProjectMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.bills != nil {
+		edges = append(edges, project.EdgeBills)
+	}
 	if m.users != nil {
 		edges = append(edges, project.EdgeUsers)
 	}
@@ -521,6 +1130,12 @@ func (m *ProjectMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ProjectMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case project.EdgeBills:
+		ids := make([]ent.Value, 0, len(m.bills))
+		for id := range m.bills {
+			ids = append(ids, id)
+		}
+		return ids
 	case project.EdgeUsers:
 		ids := make([]ent.Value, 0, len(m.users))
 		for id := range m.users {
@@ -533,7 +1148,10 @@ func (m *ProjectMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ProjectMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedbills != nil {
+		edges = append(edges, project.EdgeBills)
+	}
 	if m.removedusers != nil {
 		edges = append(edges, project.EdgeUsers)
 	}
@@ -544,6 +1162,12 @@ func (m *ProjectMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *ProjectMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case project.EdgeBills:
+		ids := make([]ent.Value, 0, len(m.removedbills))
+		for id := range m.removedbills {
+			ids = append(ids, id)
+		}
+		return ids
 	case project.EdgeUsers:
 		ids := make([]ent.Value, 0, len(m.removedusers))
 		for id := range m.removedusers {
@@ -556,7 +1180,10 @@ func (m *ProjectMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ProjectMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.clearedbills {
+		edges = append(edges, project.EdgeBills)
+	}
 	if m.clearedusers {
 		edges = append(edges, project.EdgeUsers)
 	}
@@ -567,6 +1194,8 @@ func (m *ProjectMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ProjectMutation) EdgeCleared(name string) bool {
 	switch name {
+	case project.EdgeBills:
+		return m.clearedbills
 	case project.EdgeUsers:
 		return m.clearedusers
 	}
@@ -585,6 +1214,9 @@ func (m *ProjectMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ProjectMutation) ResetEdge(name string) error {
 	switch name {
+	case project.EdgeBills:
+		m.ResetBills()
+		return nil
 	case project.EdgeUsers:
 		m.ResetUsers()
 		return nil
@@ -606,6 +1238,10 @@ type UserMutation struct {
 	projects        map[int]struct{}
 	removedprojects map[int]struct{}
 	clearedprojects bool
+	src_bill        *int
+	clearedsrc_bill bool
+	dst_bill        *int
+	cleareddst_bill bool
 	done            bool
 	oldValue        func(context.Context) (*User, error)
 	predicates      []predicate.User
@@ -907,6 +1543,84 @@ func (m *UserMutation) ResetProjects() {
 	m.removedprojects = nil
 }
 
+// SetSrcBillID sets the "src_bill" edge to the Bill entity by id.
+func (m *UserMutation) SetSrcBillID(id int) {
+	m.src_bill = &id
+}
+
+// ClearSrcBill clears the "src_bill" edge to the Bill entity.
+func (m *UserMutation) ClearSrcBill() {
+	m.clearedsrc_bill = true
+}
+
+// SrcBillCleared reports if the "src_bill" edge to the Bill entity was cleared.
+func (m *UserMutation) SrcBillCleared() bool {
+	return m.clearedsrc_bill
+}
+
+// SrcBillID returns the "src_bill" edge ID in the mutation.
+func (m *UserMutation) SrcBillID() (id int, exists bool) {
+	if m.src_bill != nil {
+		return *m.src_bill, true
+	}
+	return
+}
+
+// SrcBillIDs returns the "src_bill" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SrcBillID instead. It exists only for internal usage by the builders.
+func (m *UserMutation) SrcBillIDs() (ids []int) {
+	if id := m.src_bill; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSrcBill resets all changes to the "src_bill" edge.
+func (m *UserMutation) ResetSrcBill() {
+	m.src_bill = nil
+	m.clearedsrc_bill = false
+}
+
+// SetDstBillID sets the "dst_bill" edge to the Bill entity by id.
+func (m *UserMutation) SetDstBillID(id int) {
+	m.dst_bill = &id
+}
+
+// ClearDstBill clears the "dst_bill" edge to the Bill entity.
+func (m *UserMutation) ClearDstBill() {
+	m.cleareddst_bill = true
+}
+
+// DstBillCleared reports if the "dst_bill" edge to the Bill entity was cleared.
+func (m *UserMutation) DstBillCleared() bool {
+	return m.cleareddst_bill
+}
+
+// DstBillID returns the "dst_bill" edge ID in the mutation.
+func (m *UserMutation) DstBillID() (id int, exists bool) {
+	if m.dst_bill != nil {
+		return *m.dst_bill, true
+	}
+	return
+}
+
+// DstBillIDs returns the "dst_bill" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DstBillID instead. It exists only for internal usage by the builders.
+func (m *UserMutation) DstBillIDs() (ids []int) {
+	if id := m.dst_bill; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDstBill resets all changes to the "dst_bill" edge.
+func (m *UserMutation) ResetDstBill() {
+	m.dst_bill = nil
+	m.cleareddst_bill = false
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -1091,9 +1805,15 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.projects != nil {
 		edges = append(edges, user.EdgeProjects)
+	}
+	if m.src_bill != nil {
+		edges = append(edges, user.EdgeSrcBill)
+	}
+	if m.dst_bill != nil {
+		edges = append(edges, user.EdgeDstBill)
 	}
 	return edges
 }
@@ -1108,13 +1828,21 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeSrcBill:
+		if id := m.src_bill; id != nil {
+			return []ent.Value{*id}
+		}
+	case user.EdgeDstBill:
+		if id := m.dst_bill; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.removedprojects != nil {
 		edges = append(edges, user.EdgeProjects)
 	}
@@ -1137,9 +1865,15 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.clearedprojects {
 		edges = append(edges, user.EdgeProjects)
+	}
+	if m.clearedsrc_bill {
+		edges = append(edges, user.EdgeSrcBill)
+	}
+	if m.cleareddst_bill {
+		edges = append(edges, user.EdgeDstBill)
 	}
 	return edges
 }
@@ -1150,6 +1884,10 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
 	case user.EdgeProjects:
 		return m.clearedprojects
+	case user.EdgeSrcBill:
+		return m.clearedsrc_bill
+	case user.EdgeDstBill:
+		return m.cleareddst_bill
 	}
 	return false
 }
@@ -1158,6 +1896,12 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
+	case user.EdgeSrcBill:
+		m.ClearSrcBill()
+		return nil
+	case user.EdgeDstBill:
+		m.ClearDstBill()
+		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
 }
@@ -1168,6 +1912,12 @@ func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
 	case user.EdgeProjects:
 		m.ResetProjects()
+		return nil
+	case user.EdgeSrcBill:
+		m.ResetSrcBill()
+		return nil
+	case user.EdgeDstBill:
+		m.ResetDstBill()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

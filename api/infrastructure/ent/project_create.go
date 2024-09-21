@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/bill"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/project"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/user"
 )
@@ -37,6 +38,21 @@ func (pc *ProjectCreate) SetCreatedAt(t time.Time) *ProjectCreate {
 func (pc *ProjectCreate) SetCreatedBy(i int) *ProjectCreate {
 	pc.mutation.SetCreatedBy(i)
 	return pc
+}
+
+// AddBillIDs adds the "bills" edge to the Bill entity by IDs.
+func (pc *ProjectCreate) AddBillIDs(ids ...int) *ProjectCreate {
+	pc.mutation.AddBillIDs(ids...)
+	return pc
+}
+
+// AddBills adds the "bills" edges to the Bill entity.
+func (pc *ProjectCreate) AddBills(b ...*Bill) *ProjectCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return pc.AddBillIDs(ids...)
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
@@ -135,10 +151,26 @@ func (pc *ProjectCreate) createSpec() (*Project, *sqlgraph.CreateSpec) {
 		_spec.SetField(project.FieldCreatedBy, field.TypeInt, value)
 		_node.CreatedBy = value
 	}
+	if nodes := pc.mutation.BillsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   project.BillsTable,
+			Columns: []string{project.BillsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := pc.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,

@@ -31,17 +31,28 @@ type Project struct {
 
 // ProjectEdges holds the relations/edges for other nodes in the graph.
 type ProjectEdges struct {
+	// Bills holds the value of the bills edge.
+	Bills []*Bill `json:"bills,omitempty"`
 	// Users holds the value of the users edge.
 	Users []*User `json:"users,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
+}
+
+// BillsOrErr returns the Bills value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProjectEdges) BillsOrErr() ([]*Bill, error) {
+	if e.loadedTypes[0] {
+		return e.Bills, nil
+	}
+	return nil, &NotLoadedError{edge: "bills"}
 }
 
 // UsersOrErr returns the Users value or an error if the edge
 // was not loaded in eager-loading.
 func (e ProjectEdges) UsersOrErr() ([]*User, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[1] {
 		return e.Users, nil
 	}
 	return nil, &NotLoadedError{edge: "users"}
@@ -108,6 +119,11 @@ func (pr *Project) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (pr *Project) Value(name string) (ent.Value, error) {
 	return pr.selectValues.Get(name)
+}
+
+// QueryBills queries the "bills" edge of the Project entity.
+func (pr *Project) QueryBills() *BillQuery {
+	return NewProjectClient(pr.config).QueryBills(pr)
 }
 
 // QueryUsers queries the "users" edge of the Project entity.

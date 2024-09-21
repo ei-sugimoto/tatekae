@@ -25,5 +25,7 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("projects", Project.Type).Ref("users"),
+		edge.To("src_bill", Bill.Type).Unique(),
+		edge.To("dst_bill", Bill.Type).Unique(),
 	}
 }

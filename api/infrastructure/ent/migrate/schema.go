@@ -8,6 +8,40 @@ import (
 )
 
 var (
+	// BillsColumns holds the columns for the "bills" table.
+	BillsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "price", Type: field.TypeInt},
+		{Name: "project_bills", Type: field.TypeInt, Nullable: true},
+		{Name: "user_src_bill", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "user_dst_bill", Type: field.TypeInt, Unique: true, Nullable: true},
+	}
+	// BillsTable holds the schema information for the "bills" table.
+	BillsTable = &schema.Table{
+		Name:       "bills",
+		Columns:    BillsColumns,
+		PrimaryKey: []*schema.Column{BillsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "bills_projects_bills",
+				Columns:    []*schema.Column{BillsColumns[2]},
+				RefColumns: []*schema.Column{ProjectsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "bills_users_src_bill",
+				Columns:    []*schema.Column{BillsColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "bills_users_dst_bill",
+				Columns:    []*schema.Column{BillsColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// ProjectsColumns holds the columns for the "projects" table.
 	ProjectsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -35,40 +69,44 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
-	// UserProjectsColumns holds the columns for the "user_projects" table.
-	UserProjectsColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeInt},
+	// ProjectUsersColumns holds the columns for the "project_users" table.
+	ProjectUsersColumns = []*schema.Column{
 		{Name: "project_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt},
 	}
-	// UserProjectsTable holds the schema information for the "user_projects" table.
-	UserProjectsTable = &schema.Table{
-		Name:       "user_projects",
-		Columns:    UserProjectsColumns,
-		PrimaryKey: []*schema.Column{UserProjectsColumns[0], UserProjectsColumns[1]},
+	// ProjectUsersTable holds the schema information for the "project_users" table.
+	ProjectUsersTable = &schema.Table{
+		Name:       "project_users",
+		Columns:    ProjectUsersColumns,
+		PrimaryKey: []*schema.Column{ProjectUsersColumns[0], ProjectUsersColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "user_projects_user_id",
-				Columns:    []*schema.Column{UserProjectsColumns[0]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				Symbol:     "project_users_project_id",
+				Columns:    []*schema.Column{ProjectUsersColumns[0]},
+				RefColumns: []*schema.Column{ProjectsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "user_projects_project_id",
-				Columns:    []*schema.Column{UserProjectsColumns[1]},
-				RefColumns: []*schema.Column{ProjectsColumns[0]},
+				Symbol:     "project_users_user_id",
+				Columns:    []*schema.Column{ProjectUsersColumns[1]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		BillsTable,
 		ProjectsTable,
 		UsersTable,
-		UserProjectsTable,
+		ProjectUsersTable,
 	}
 )
 
 func init() {
-	UserProjectsTable.ForeignKeys[0].RefTable = UsersTable
-	UserProjectsTable.ForeignKeys[1].RefTable = ProjectsTable
+	BillsTable.ForeignKeys[0].RefTable = ProjectsTable
+	BillsTable.ForeignKeys[1].RefTable = UsersTable
+	BillsTable.ForeignKeys[2].RefTable = UsersTable
+	ProjectUsersTable.ForeignKeys[0].RefTable = ProjectsTable
+	ProjectUsersTable.ForeignKeys[1].RefTable = UsersTable
 }

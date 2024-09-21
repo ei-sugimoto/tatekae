@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/bill"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/project"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/user"
 )
@@ -24,6 +25,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Bill is the client for interacting with the Bill builders.
+	Bill *BillClient
 	// Project is the client for interacting with the Project builders.
 	Project *ProjectClient
 	// User is the client for interacting with the User builders.
@@ -39,6 +42,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Bill = NewBillClient(c.config)
 	c.Project = NewProjectClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -133,6 +137,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:     ctx,
 		config:  cfg,
+		Bill:    NewBillClient(cfg),
 		Project: NewProjectClient(cfg),
 		User:    NewUserClient(cfg),
 	}, nil
@@ -154,6 +159,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:     ctx,
 		config:  cfg,
+		Bill:    NewBillClient(cfg),
 		Project: NewProjectClient(cfg),
 		User:    NewUserClient(cfg),
 	}, nil
@@ -162,7 +168,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Project.
+//		Bill.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -184,6 +190,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Bill.Use(hooks...)
 	c.Project.Use(hooks...)
 	c.User.Use(hooks...)
 }
@@ -191,6 +198,7 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Bill.Intercept(interceptors...)
 	c.Project.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
@@ -198,12 +206,195 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *BillMutation:
+		return c.Bill.mutate(ctx, m)
 	case *ProjectMutation:
 		return c.Project.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// BillClient is a client for the Bill schema.
+type BillClient struct {
+	config
+}
+
+// NewBillClient returns a client for the Bill from the given config.
+func NewBillClient(c config) *BillClient {
+	return &BillClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `bill.Hooks(f(g(h())))`.
+func (c *BillClient) Use(hooks ...Hook) {
+	c.hooks.Bill = append(c.hooks.Bill, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `bill.Intercept(f(g(h())))`.
+func (c *BillClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Bill = append(c.inters.Bill, interceptors...)
+}
+
+// Create returns a builder for creating a Bill entity.
+func (c *BillClient) Create() *BillCreate {
+	mutation := newBillMutation(c.config, OpCreate)
+	return &BillCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Bill entities.
+func (c *BillClient) CreateBulk(builders ...*BillCreate) *BillCreateBulk {
+	return &BillCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BillClient) MapCreateBulk(slice any, setFunc func(*BillCreate, int)) *BillCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BillCreateBulk{err: fmt.Errorf("calling to BillClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BillCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BillCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Bill.
+func (c *BillClient) Update() *BillUpdate {
+	mutation := newBillMutation(c.config, OpUpdate)
+	return &BillUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BillClient) UpdateOne(b *Bill) *BillUpdateOne {
+	mutation := newBillMutation(c.config, OpUpdateOne, withBill(b))
+	return &BillUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BillClient) UpdateOneID(id int) *BillUpdateOne {
+	mutation := newBillMutation(c.config, OpUpdateOne, withBillID(id))
+	return &BillUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Bill.
+func (c *BillClient) Delete() *BillDelete {
+	mutation := newBillMutation(c.config, OpDelete)
+	return &BillDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BillClient) DeleteOne(b *Bill) *BillDeleteOne {
+	return c.DeleteOneID(b.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BillClient) DeleteOneID(id int) *BillDeleteOne {
+	builder := c.Delete().Where(bill.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BillDeleteOne{builder}
+}
+
+// Query returns a query builder for Bill.
+func (c *BillClient) Query() *BillQuery {
+	return &BillQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBill},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Bill entity by its id.
+func (c *BillClient) Get(ctx context.Context, id int) (*Bill, error) {
+	return c.Query().Where(bill.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BillClient) GetX(ctx context.Context, id int) *Bill {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryProjectID queries the project_id edge of a Bill.
+func (c *BillClient) QueryProjectID(b *Bill) *ProjectQuery {
+	query := (&ProjectClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(bill.Table, bill.FieldID, id),
+			sqlgraph.To(project.Table, project.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, bill.ProjectIDTable, bill.ProjectIDColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySrcUser queries the src_user edge of a Bill.
+func (c *BillClient) QuerySrcUser(b *Bill) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(bill.Table, bill.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, bill.SrcUserTable, bill.SrcUserColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDstUser queries the dst_user edge of a Bill.
+func (c *BillClient) QueryDstUser(b *Bill) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(bill.Table, bill.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, bill.DstUserTable, bill.DstUserColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *BillClient) Hooks() []Hook {
+	return c.hooks.Bill
+}
+
+// Interceptors returns the client interceptors.
+func (c *BillClient) Interceptors() []Interceptor {
+	return c.inters.Bill
+}
+
+func (c *BillClient) mutate(ctx context.Context, m *BillMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BillCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BillUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BillUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BillDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Bill mutation op: %q", m.Op())
 	}
 }
 
@@ -315,6 +506,22 @@ func (c *ProjectClient) GetX(ctx context.Context, id int) *Project {
 	return obj
 }
 
+// QueryBills queries the bills edge of a Project.
+func (c *ProjectClient) QueryBills(pr *Project) *BillQuery {
+	query := (&BillClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(project.Table, project.FieldID, id),
+			sqlgraph.To(bill.Table, bill.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, project.BillsTable, project.BillsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryUsers queries the users edge of a Project.
 func (c *ProjectClient) QueryUsers(pr *Project) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
@@ -323,7 +530,7 @@ func (c *ProjectClient) QueryUsers(pr *Project) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(project.Table, project.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, project.UsersTable, project.UsersPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, project.UsersTable, project.UsersPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil
@@ -472,7 +679,39 @@ func (c *UserClient) QueryProjects(u *User) *ProjectQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.ProjectsTable, user.ProjectsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.ProjectsTable, user.ProjectsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySrcBill queries the src_bill edge of a User.
+func (c *UserClient) QuerySrcBill(u *User) *BillQuery {
+	query := (&BillClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(bill.Table, bill.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.SrcBillTable, user.SrcBillColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDstBill queries the dst_bill edge of a User.
+func (c *UserClient) QueryDstBill(u *User) *BillQuery {
+	query := (&BillClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(bill.Table, bill.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.DstBillTable, user.DstBillColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -508,9 +747,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Project, User []ent.Hook
+		Bill, Project, User []ent.Hook
 	}
 	inters struct {
-		Project, User []ent.Interceptor
+		Bill, Project, User []ent.Interceptor
 	}
 )

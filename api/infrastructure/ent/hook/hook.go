@@ -9,6 +9,18 @@ import (
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent"
 )
 
+// The BillFunc type is an adapter to allow the use of ordinary
+// function as Bill mutator.
+type BillFunc func(context.Context, *ent.BillMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BillFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BillMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BillMutation", m)
+}
+
 // The ProjectFunc type is an adapter to allow the use of ordinary
 // function as Project mutator.
 type ProjectFunc func(context.Context, *ent.ProjectMutation) (ent.Value, error)

@@ -22,13 +22,31 @@ const (
 	FieldCreatedAt = "created_at"
 	// EdgeProjects holds the string denoting the projects edge name in mutations.
 	EdgeProjects = "projects"
+	// EdgeSrcBill holds the string denoting the src_bill edge name in mutations.
+	EdgeSrcBill = "src_bill"
+	// EdgeDstBill holds the string denoting the dst_bill edge name in mutations.
+	EdgeDstBill = "dst_bill"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ProjectsTable is the table that holds the projects relation/edge. The primary key declared below.
-	ProjectsTable = "user_projects"
+	ProjectsTable = "project_users"
 	// ProjectsInverseTable is the table name for the Project entity.
 	// It exists in this package in order to avoid circular dependency with the "project" package.
 	ProjectsInverseTable = "projects"
+	// SrcBillTable is the table that holds the src_bill relation/edge.
+	SrcBillTable = "bills"
+	// SrcBillInverseTable is the table name for the Bill entity.
+	// It exists in this package in order to avoid circular dependency with the "bill" package.
+	SrcBillInverseTable = "bills"
+	// SrcBillColumn is the table column denoting the src_bill relation/edge.
+	SrcBillColumn = "user_src_bill"
+	// DstBillTable is the table that holds the dst_bill relation/edge.
+	DstBillTable = "bills"
+	// DstBillInverseTable is the table name for the Bill entity.
+	// It exists in this package in order to avoid circular dependency with the "bill" package.
+	DstBillInverseTable = "bills"
+	// DstBillColumn is the table column denoting the dst_bill relation/edge.
+	DstBillColumn = "user_dst_bill"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -43,7 +61,7 @@ var Columns = []string{
 var (
 	// ProjectsPrimaryKey and ProjectsColumn2 are the table columns denoting the
 	// primary key for the projects relation (M2M).
-	ProjectsPrimaryKey = []string{"user_id", "project_id"}
+	ProjectsPrimaryKey = []string{"project_id", "user_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -97,10 +115,38 @@ func ByProjects(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newProjectsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySrcBillField orders the results by src_bill field.
+func BySrcBillField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSrcBillStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByDstBillField orders the results by dst_bill field.
+func ByDstBillField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDstBillStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newProjectsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ProjectsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, ProjectsTable, ProjectsPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2M, true, ProjectsTable, ProjectsPrimaryKey...),
+	)
+}
+func newSrcBillStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SrcBillInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, SrcBillTable, SrcBillColumn),
+	)
+}
+func newDstBillStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DstBillInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, DstBillTable, DstBillColumn),
 	)
 }

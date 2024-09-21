@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/bill"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/project"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/user"
 )
@@ -58,6 +59,44 @@ func (uc *UserCreate) AddProjects(p ...*Project) *UserCreate {
 		ids[i] = p[i].ID
 	}
 	return uc.AddProjectIDs(ids...)
+}
+
+// SetSrcBillID sets the "src_bill" edge to the Bill entity by ID.
+func (uc *UserCreate) SetSrcBillID(id int) *UserCreate {
+	uc.mutation.SetSrcBillID(id)
+	return uc
+}
+
+// SetNillableSrcBillID sets the "src_bill" edge to the Bill entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableSrcBillID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetSrcBillID(*id)
+	}
+	return uc
+}
+
+// SetSrcBill sets the "src_bill" edge to the Bill entity.
+func (uc *UserCreate) SetSrcBill(b *Bill) *UserCreate {
+	return uc.SetSrcBillID(b.ID)
+}
+
+// SetDstBillID sets the "dst_bill" edge to the Bill entity by ID.
+func (uc *UserCreate) SetDstBillID(id int) *UserCreate {
+	uc.mutation.SetDstBillID(id)
+	return uc
+}
+
+// SetNillableDstBillID sets the "dst_bill" edge to the Bill entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableDstBillID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetDstBillID(*id)
+	}
+	return uc
+}
+
+// SetDstBill sets the "dst_bill" edge to the Bill entity.
+func (uc *UserCreate) SetDstBill(b *Bill) *UserCreate {
+	return uc.SetDstBillID(b.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -151,12 +190,44 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if nodes := uc.mutation.ProjectsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   user.ProjectsTable,
 			Columns: user.ProjectsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.SrcBillIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.SrcBillTable,
+			Columns: []string{user.SrcBillColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.DstBillIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.DstBillTable,
+			Columns: []string{user.DstBillColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

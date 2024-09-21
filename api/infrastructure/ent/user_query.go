@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/bill"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/predicate"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/project"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/user"
@@ -25,6 +26,8 @@ type UserQuery struct {
 	inters       []Interceptor
 	predicates   []predicate.User
 	withProjects *ProjectQuery
+	withSrcBill  *BillQuery
+	withDstBill  *BillQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,7 +78,51 @@ func (uq *UserQuery) QueryProjects() *ProjectQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.ProjectsTable, user.ProjectsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.ProjectsTable, user.ProjectsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySrcBill chains the current query on the "src_bill" edge.
+func (uq *UserQuery) QuerySrcBill() *BillQuery {
+	query := (&BillClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(bill.Table, bill.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.SrcBillTable, user.SrcBillColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDstBill chains the current query on the "dst_bill" edge.
+func (uq *UserQuery) QueryDstBill() *BillQuery {
+	query := (&BillClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(bill.Table, bill.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.DstBillTable, user.DstBillColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -276,6 +323,8 @@ func (uq *UserQuery) Clone() *UserQuery {
 		inters:       append([]Interceptor{}, uq.inters...),
 		predicates:   append([]predicate.User{}, uq.predicates...),
 		withProjects: uq.withProjects.Clone(),
+		withSrcBill:  uq.withSrcBill.Clone(),
+		withDstBill:  uq.withDstBill.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -290,6 +339,28 @@ func (uq *UserQuery) WithProjects(opts ...func(*ProjectQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withProjects = query
+	return uq
+}
+
+// WithSrcBill tells the query-builder to eager-load the nodes that are connected to
+// the "src_bill" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithSrcBill(opts ...func(*BillQuery)) *UserQuery {
+	query := (&BillClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withSrcBill = query
+	return uq
+}
+
+// WithDstBill tells the query-builder to eager-load the nodes that are connected to
+// the "dst_bill" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithDstBill(opts ...func(*BillQuery)) *UserQuery {
+	query := (&BillClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withDstBill = query
 	return uq
 }
 
@@ -371,8 +442,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [3]bool{
 			uq.withProjects != nil,
+			uq.withSrcBill != nil,
+			uq.withDstBill != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -400,6 +473,18 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	if query := uq.withSrcBill; query != nil {
+		if err := uq.loadSrcBill(ctx, query, nodes, nil,
+			func(n *User, e *Bill) { n.Edges.SrcBill = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withDstBill; query != nil {
+		if err := uq.loadDstBill(ctx, query, nodes, nil,
+			func(n *User, e *Bill) { n.Edges.DstBill = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -416,10 +501,10 @@ func (uq *UserQuery) loadProjects(ctx context.Context, query *ProjectQuery, node
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(user.ProjectsTable)
-		s.Join(joinT).On(s.C(project.FieldID), joinT.C(user.ProjectsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(user.ProjectsPrimaryKey[0]), edgeIDs...))
+		s.Join(joinT).On(s.C(project.FieldID), joinT.C(user.ProjectsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(user.ProjectsPrimaryKey[1]), edgeIDs...))
 		columns := s.SelectedColumns()
-		s.Select(joinT.C(user.ProjectsPrimaryKey[0]))
+		s.Select(joinT.C(user.ProjectsPrimaryKey[1]))
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
@@ -461,6 +546,62 @@ func (uq *UserQuery) loadProjects(ctx context.Context, query *ProjectQuery, node
 		for kn := range nodes {
 			assign(kn, n)
 		}
+	}
+	return nil
+}
+func (uq *UserQuery) loadSrcBill(ctx context.Context, query *BillQuery, nodes []*User, init func(*User), assign func(*User, *Bill)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.withFKs = true
+	query.Where(predicate.Bill(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.SrcBillColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_src_bill
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_src_bill" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_src_bill" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadDstBill(ctx context.Context, query *BillQuery, nodes []*User, init func(*User), assign func(*User, *Bill)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.withFKs = true
+	query.Where(predicate.Bill(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.DstBillColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_dst_bill
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_dst_bill" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_dst_bill" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

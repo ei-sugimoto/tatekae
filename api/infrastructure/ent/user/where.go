@@ -315,7 +315,7 @@ func HasProjects() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, ProjectsTable, ProjectsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, ProjectsTable, ProjectsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -325,6 +325,52 @@ func HasProjects() predicate.User {
 func HasProjectsWith(preds ...predicate.Project) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newProjectsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSrcBill applies the HasEdge predicate on the "src_bill" edge.
+func HasSrcBill() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, SrcBillTable, SrcBillColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSrcBillWith applies the HasEdge predicate on the "src_bill" edge with a given conditions (other predicates).
+func HasSrcBillWith(preds ...predicate.Bill) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newSrcBillStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDstBill applies the HasEdge predicate on the "dst_bill" edge.
+func HasDstBill() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, DstBillTable, DstBillColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDstBillWith applies the HasEdge predicate on the "dst_bill" edge with a given conditions (other predicates).
+func HasDstBillWith(preds ...predicate.Bill) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newDstBillStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
