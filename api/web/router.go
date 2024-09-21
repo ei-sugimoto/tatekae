@@ -49,6 +49,7 @@ func (r *Router) Run() {
 
 	r.NewUserService()
 	r.NewProjectService()
+	r.NewBillService()
 
 	reflection.Register(r.Engine)
 
@@ -88,5 +89,16 @@ func (r *Router) NewProjectService() {
 	projectHandler := handler.NewProjectHandler(projectUsecase)
 
 	proto.RegisterProjectServiceServer(r.Engine, projectHandler)
+
+}
+
+func (r *Router) NewBillService() {
+
+	db := infrastructure.NewDB()
+	billPersistence := persistence.NewPersistBill(db)
+	billUsecase := usecase.NewBillUsecase(billPersistence)
+	billHandler := handler.NewBillHandler(billUsecase)
+
+	proto.RegisterBillServiceServer(r.Engine, billHandler)
 
 }

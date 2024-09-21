@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package protoBill;
+
+option go_package = "./proto";
+
+service BillService {
+    rpc Create(CreateBillRequest) returns (CreateBillResponse);
+}
+
+message CreateBillRequest {
+    int32 price = 1;
+    int32 projectId = 2;
+    int32 srcUserId = 3;
+    int32 dstUserId = 4;
+}
+
+message CreateBillResponse {
+    int32 price = 1;
+    int32 projectId = 2;
+    int32 srcUserId = 3;
+    int32 dstUserId = 4;
+    int32 ID = 5;
+}
