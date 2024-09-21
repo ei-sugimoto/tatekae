@@ -323,7 +323,7 @@ func (c *ProjectClient) QueryUsers(pr *Project) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(project.Table, project.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, project.UsersTable, project.UsersPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, project.UsersTable, project.UsersPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil
@@ -472,7 +472,7 @@ func (c *UserClient) QueryProjects(u *User) *ProjectQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, user.ProjectsTable, user.ProjectsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.ProjectsTable, user.ProjectsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

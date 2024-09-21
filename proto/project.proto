@@ -6,6 +6,12 @@ option go_package = "./proto";
 
 service ProjectService {
     rpc Create(CreateRequest) returns (CreateResponse);
+    rpc List(ListRequest) returns (ListResponse);
+}
+
+message Project {
+    int32 id = 1;
+    string name = 2;
 }
 
 message CreateRequest {
@@ -15,4 +21,11 @@ message CreateRequest {
 message CreateResponse {
     int32 id = 1;
     string name = 2;
+}
+
+message ListRequest {
+}
+
+message ListResponse {
+    repeated Project projects = 1;
 }

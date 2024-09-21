@@ -152,7 +152,7 @@ func (pu *ProjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if pu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,
@@ -165,7 +165,7 @@ func (pu *ProjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := pu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !pu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,
@@ -181,7 +181,7 @@ func (pu *ProjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := pu.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,
@@ -368,7 +368,7 @@ func (puo *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err e
 	if puo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,
@@ -381,7 +381,7 @@ func (puo *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err e
 	if nodes := puo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !puo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,
@@ -397,7 +397,7 @@ func (puo *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err e
 	if nodes := puo.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   project.UsersTable,
 			Columns: project.UsersPrimaryKey,
 			Bidi:    false,

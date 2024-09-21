@@ -23,7 +23,7 @@ const (
 	// Table holds the table name of the project in the database.
 	Table = "projects"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
-	UsersTable = "project_users"
+	UsersTable = "user_projects"
 	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UsersInverseTable = "users"
@@ -40,7 +40,7 @@ var Columns = []string{
 var (
 	// UsersPrimaryKey and UsersColumn2 are the table columns denoting the
 	// primary key for the users relation (M2M).
-	UsersPrimaryKey = []string{"project_id", "user_id"}
+	UsersPrimaryKey = []string{"user_id", "project_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -93,6 +93,6 @@ func newUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UsersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, UsersTable, UsersPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2M, true, UsersTable, UsersPrimaryKey...),
 	)
 }

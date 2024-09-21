@@ -23,6 +23,6 @@ func (Project) Fields() []ent.Field {
 // Edges of the Project.
 func (Project) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("users", User.Type),
+		edge.From("users", User.Type).Ref("projects"),
 	}
 }

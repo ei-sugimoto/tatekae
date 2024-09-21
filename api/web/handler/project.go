@@ -37,3 +37,20 @@ func (h *ProjectHandler) Create(c context.Context, req *proto.CreateRequest) (*p
 
 	return &proto.CreateResponse{Id: int32(res.ID), Name: res.Name}, nil
 }
+
+func (h *ProjectHandler) List(c context.Context, req *proto.ListRequest) (*proto.ListResponse, error) {
+	projects, err := h.ProjectUsecase.List()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list projects: %v", err)
+	}
+
+	res := make([]*proto.Project, 0, len(projects))
+	for _, project := range projects {
+		res = append(res, &proto.Project{
+			Id:   int32(project.ID),
+			Name: project.Name,
+		})
+	}
+
+	return &proto.ListResponse{Projects: res}, nil
+}
