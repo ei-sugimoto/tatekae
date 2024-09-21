@@ -46,10 +46,10 @@ func ParseToken(tokenString string) (jwt.MapClaims, error) {
 		return []byte("ACCESS_SECRET_KEY"), nil
 	})
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
+	if err != nil {
 		return nil, err
 	}
+	claims := token.Claims.(jwt.MapClaims)
 
 	return claims, err
 

@@ -2,6 +2,8 @@ package middleware
 
 import (
 	"context"
+	"log"
+	"strings"
 
 	"github.com/ei-sugimoto/tatekae/api/pkg"
 	"google.golang.org/grpc"
@@ -34,28 +36,20 @@ func SetInfo(authorization []string, ctx context.Context) bool {
 	if len(authorization) < 1 {
 		return false
 	}
-	token := authorization[1]
+	token := authorization[0]
+	token = strings.Split(token, "Bearer ")[1]
 	claims, err := pkg.ParseToken(token)
 	if err != nil {
+		log.Println("err1:", err)
 		return false
 	}
-	if claims == nil {
+	me, err := pkg.GetUserInfo(claims)
+	if err != nil {
+		log.Println("err2:", err)
 		return false
 	}
-	id := claims["id"].(int)
-	if id == 0 {
-		return false
-	}
-	ctx = context.WithValue(ctx, "id", id)
-	username := claims["username"].(string)
-	if username == "" {
-		return false
-	}
-	ctx = context.WithValue(ctx, "username", username)
-	email := claims["email"].(string)
-	if email == "" {
-		return false
-	}
-	ctx = context.WithValue(ctx, "email", email)
+	ctx = context.WithValue(ctx, "id", me.ID)
+	ctx = context.WithValue(ctx, "username", me.Username)
+	ctx = context.WithValue(ctx, "email", me.Email)
 	return true
 }
