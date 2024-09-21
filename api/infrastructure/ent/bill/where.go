@@ -98,21 +98,21 @@ func PriceLTE(v int) predicate.Bill {
 	return predicate.Bill(sql.FieldLTE(FieldPrice, v))
 }
 
-// HasProjectID applies the HasEdge predicate on the "project_id" edge.
-func HasProjectID() predicate.Bill {
+// HasProject applies the HasEdge predicate on the "project" edge.
+func HasProject() predicate.Bill {
 	return predicate.Bill(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ProjectIDTable, ProjectIDColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, ProjectTable, ProjectColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasProjectIDWith applies the HasEdge predicate on the "project_id" edge with a given conditions (other predicates).
-func HasProjectIDWith(preds ...predicate.Project) predicate.Bill {
+// HasProjectWith applies the HasEdge predicate on the "project" edge with a given conditions (other predicates).
+func HasProjectWith(preds ...predicate.Project) predicate.Bill {
 	return predicate.Bill(func(s *sql.Selector) {
-		step := newProjectIDStep()
+		step := newProjectStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

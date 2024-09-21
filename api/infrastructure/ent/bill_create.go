@@ -27,23 +27,23 @@ func (bc *BillCreate) SetPrice(i int) *BillCreate {
 	return bc
 }
 
-// SetProjectIDID sets the "project_id" edge to the Project entity by ID.
-func (bc *BillCreate) SetProjectIDID(id int) *BillCreate {
-	bc.mutation.SetProjectIDID(id)
+// SetProjectID sets the "project" edge to the Project entity by ID.
+func (bc *BillCreate) SetProjectID(id int) *BillCreate {
+	bc.mutation.SetProjectID(id)
 	return bc
 }
 
-// SetNillableProjectIDID sets the "project_id" edge to the Project entity by ID if the given value is not nil.
-func (bc *BillCreate) SetNillableProjectIDID(id *int) *BillCreate {
+// SetNillableProjectID sets the "project" edge to the Project entity by ID if the given value is not nil.
+func (bc *BillCreate) SetNillableProjectID(id *int) *BillCreate {
 	if id != nil {
-		bc = bc.SetProjectIDID(*id)
+		bc = bc.SetProjectID(*id)
 	}
 	return bc
 }
 
-// SetProjectID sets the "project_id" edge to the Project entity.
-func (bc *BillCreate) SetProjectID(p *Project) *BillCreate {
-	return bc.SetProjectIDID(p.ID)
+// SetProject sets the "project" edge to the Project entity.
+func (bc *BillCreate) SetProject(p *Project) *BillCreate {
+	return bc.SetProjectID(p.ID)
 }
 
 // SetSrcUserID sets the "src_user" edge to the User entity by ID.
@@ -151,12 +151,12 @@ func (bc *BillCreate) createSpec() (*Bill, *sqlgraph.CreateSpec) {
 		_spec.SetField(bill.FieldPrice, field.TypeInt, value)
 		_node.Price = value
 	}
-	if nodes := bc.mutation.ProjectIDIDs(); len(nodes) > 0 {
+	if nodes := bc.mutation.ProjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   bill.ProjectIDTable,
-			Columns: []string{bill.ProjectIDColumn},
+			Table:   bill.ProjectTable,
+			Columns: []string{bill.ProjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeInt),

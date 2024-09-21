@@ -50,23 +50,23 @@ func (bu *BillUpdate) AddPrice(i int) *BillUpdate {
 	return bu
 }
 
-// SetProjectIDID sets the "project_id" edge to the Project entity by ID.
-func (bu *BillUpdate) SetProjectIDID(id int) *BillUpdate {
-	bu.mutation.SetProjectIDID(id)
+// SetProjectID sets the "project" edge to the Project entity by ID.
+func (bu *BillUpdate) SetProjectID(id int) *BillUpdate {
+	bu.mutation.SetProjectID(id)
 	return bu
 }
 
-// SetNillableProjectIDID sets the "project_id" edge to the Project entity by ID if the given value is not nil.
-func (bu *BillUpdate) SetNillableProjectIDID(id *int) *BillUpdate {
+// SetNillableProjectID sets the "project" edge to the Project entity by ID if the given value is not nil.
+func (bu *BillUpdate) SetNillableProjectID(id *int) *BillUpdate {
 	if id != nil {
-		bu = bu.SetProjectIDID(*id)
+		bu = bu.SetProjectID(*id)
 	}
 	return bu
 }
 
-// SetProjectID sets the "project_id" edge to the Project entity.
-func (bu *BillUpdate) SetProjectID(p *Project) *BillUpdate {
-	return bu.SetProjectIDID(p.ID)
+// SetProject sets the "project" edge to the Project entity.
+func (bu *BillUpdate) SetProject(p *Project) *BillUpdate {
+	return bu.SetProjectID(p.ID)
 }
 
 // SetSrcUserID sets the "src_user" edge to the User entity by ID.
@@ -112,9 +112,9 @@ func (bu *BillUpdate) Mutation() *BillMutation {
 	return bu.mutation
 }
 
-// ClearProjectID clears the "project_id" edge to the Project entity.
-func (bu *BillUpdate) ClearProjectID() *BillUpdate {
-	bu.mutation.ClearProjectID()
+// ClearProject clears the "project" edge to the Project entity.
+func (bu *BillUpdate) ClearProject() *BillUpdate {
+	bu.mutation.ClearProject()
 	return bu
 }
 
@@ -172,12 +172,12 @@ func (bu *BillUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := bu.mutation.AddedPrice(); ok {
 		_spec.AddField(bill.FieldPrice, field.TypeInt, value)
 	}
-	if bu.mutation.ProjectIDCleared() {
+	if bu.mutation.ProjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   bill.ProjectIDTable,
-			Columns: []string{bill.ProjectIDColumn},
+			Table:   bill.ProjectTable,
+			Columns: []string{bill.ProjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeInt),
@@ -185,12 +185,12 @@ func (bu *BillUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.ProjectIDIDs(); len(nodes) > 0 {
+	if nodes := bu.mutation.ProjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   bill.ProjectIDTable,
-			Columns: []string{bill.ProjectIDColumn},
+			Table:   bill.ProjectTable,
+			Columns: []string{bill.ProjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeInt),
@@ -300,23 +300,23 @@ func (buo *BillUpdateOne) AddPrice(i int) *BillUpdateOne {
 	return buo
 }
 
-// SetProjectIDID sets the "project_id" edge to the Project entity by ID.
-func (buo *BillUpdateOne) SetProjectIDID(id int) *BillUpdateOne {
-	buo.mutation.SetProjectIDID(id)
+// SetProjectID sets the "project" edge to the Project entity by ID.
+func (buo *BillUpdateOne) SetProjectID(id int) *BillUpdateOne {
+	buo.mutation.SetProjectID(id)
 	return buo
 }
 
-// SetNillableProjectIDID sets the "project_id" edge to the Project entity by ID if the given value is not nil.
-func (buo *BillUpdateOne) SetNillableProjectIDID(id *int) *BillUpdateOne {
+// SetNillableProjectID sets the "project" edge to the Project entity by ID if the given value is not nil.
+func (buo *BillUpdateOne) SetNillableProjectID(id *int) *BillUpdateOne {
 	if id != nil {
-		buo = buo.SetProjectIDID(*id)
+		buo = buo.SetProjectID(*id)
 	}
 	return buo
 }
 
-// SetProjectID sets the "project_id" edge to the Project entity.
-func (buo *BillUpdateOne) SetProjectID(p *Project) *BillUpdateOne {
-	return buo.SetProjectIDID(p.ID)
+// SetProject sets the "project" edge to the Project entity.
+func (buo *BillUpdateOne) SetProject(p *Project) *BillUpdateOne {
+	return buo.SetProjectID(p.ID)
 }
 
 // SetSrcUserID sets the "src_user" edge to the User entity by ID.
@@ -362,9 +362,9 @@ func (buo *BillUpdateOne) Mutation() *BillMutation {
 	return buo.mutation
 }
 
-// ClearProjectID clears the "project_id" edge to the Project entity.
-func (buo *BillUpdateOne) ClearProjectID() *BillUpdateOne {
-	buo.mutation.ClearProjectID()
+// ClearProject clears the "project" edge to the Project entity.
+func (buo *BillUpdateOne) ClearProject() *BillUpdateOne {
+	buo.mutation.ClearProject()
 	return buo
 }
 
@@ -452,12 +452,12 @@ func (buo *BillUpdateOne) sqlSave(ctx context.Context) (_node *Bill, err error) 
 	if value, ok := buo.mutation.AddedPrice(); ok {
 		_spec.AddField(bill.FieldPrice, field.TypeInt, value)
 	}
-	if buo.mutation.ProjectIDCleared() {
+	if buo.mutation.ProjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   bill.ProjectIDTable,
-			Columns: []string{bill.ProjectIDColumn},
+			Table:   bill.ProjectTable,
+			Columns: []string{bill.ProjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeInt),
@@ -465,12 +465,12 @@ func (buo *BillUpdateOne) sqlSave(ctx context.Context) (_node *Bill, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.ProjectIDIDs(); len(nodes) > 0 {
+	if nodes := buo.mutation.ProjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   bill.ProjectIDTable,
-			Columns: []string{bill.ProjectIDColumn},
+			Table:   bill.ProjectTable,
+			Columns: []string{bill.ProjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeInt),

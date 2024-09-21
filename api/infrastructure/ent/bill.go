@@ -31,8 +31,8 @@ type Bill struct {
 
 // BillEdges holds the relations/edges for other nodes in the graph.
 type BillEdges struct {
-	// ProjectID holds the value of the project_id edge.
-	ProjectID *Project `json:"project_id,omitempty"`
+	// Project holds the value of the project edge.
+	Project *Project `json:"project,omitempty"`
 	// SrcUser holds the value of the src_user edge.
 	SrcUser *User `json:"src_user,omitempty"`
 	// DstUser holds the value of the dst_user edge.
@@ -42,15 +42,15 @@ type BillEdges struct {
 	loadedTypes [3]bool
 }
 
-// ProjectIDOrErr returns the ProjectID value or an error if the edge
+// ProjectOrErr returns the Project value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e BillEdges) ProjectIDOrErr() (*Project, error) {
-	if e.ProjectID != nil {
-		return e.ProjectID, nil
+func (e BillEdges) ProjectOrErr() (*Project, error) {
+	if e.Project != nil {
+		return e.Project, nil
 	} else if e.loadedTypes[0] {
 		return nil, &NotFoundError{label: project.Label}
 	}
-	return nil, &NotLoadedError{edge: "project_id"}
+	return nil, &NotLoadedError{edge: "project"}
 }
 
 // SrcUserOrErr returns the SrcUser value or an error if the edge
@@ -149,9 +149,9 @@ func (b *Bill) Value(name string) (ent.Value, error) {
 	return b.selectValues.Get(name)
 }
 
-// QueryProjectID queries the "project_id" edge of the Bill entity.
-func (b *Bill) QueryProjectID() *ProjectQuery {
-	return NewBillClient(b.config).QueryProjectID(b)
+// QueryProject queries the "project" edge of the Bill entity.
+func (b *Bill) QueryProject() *ProjectQuery {
+	return NewBillClient(b.config).QueryProject(b)
 }
 
 // QuerySrcUser queries the "src_user" edge of the Bill entity.

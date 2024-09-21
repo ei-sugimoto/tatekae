@@ -34,21 +34,21 @@ const (
 // BillMutation represents an operation that mutates the Bill nodes in the graph.
 type BillMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *int
-	price             *int
-	addprice          *int
-	clearedFields     map[string]struct{}
-	project_id        *int
-	clearedproject_id bool
-	src_user          *int
-	clearedsrc_user   bool
-	dst_user          *int
-	cleareddst_user   bool
-	done              bool
-	oldValue          func(context.Context) (*Bill, error)
-	predicates        []predicate.Bill
+	op              Op
+	typ             string
+	id              *int
+	price           *int
+	addprice        *int
+	clearedFields   map[string]struct{}
+	project         *int
+	clearedproject  bool
+	src_user        *int
+	clearedsrc_user bool
+	dst_user        *int
+	cleareddst_user bool
+	done            bool
+	oldValue        func(context.Context) (*Bill, error)
+	predicates      []predicate.Bill
 }
 
 var _ ent.Mutation = (*BillMutation)(nil)
@@ -205,43 +205,43 @@ func (m *BillMutation) ResetPrice() {
 	m.addprice = nil
 }
 
-// SetProjectIDID sets the "project_id" edge to the Project entity by id.
-func (m *BillMutation) SetProjectIDID(id int) {
-	m.project_id = &id
+// SetProjectID sets the "project" edge to the Project entity by id.
+func (m *BillMutation) SetProjectID(id int) {
+	m.project = &id
 }
 
-// ClearProjectID clears the "project_id" edge to the Project entity.
-func (m *BillMutation) ClearProjectID() {
-	m.clearedproject_id = true
+// ClearProject clears the "project" edge to the Project entity.
+func (m *BillMutation) ClearProject() {
+	m.clearedproject = true
 }
 
-// ProjectIDCleared reports if the "project_id" edge to the Project entity was cleared.
-func (m *BillMutation) ProjectIDCleared() bool {
-	return m.clearedproject_id
+// ProjectCleared reports if the "project" edge to the Project entity was cleared.
+func (m *BillMutation) ProjectCleared() bool {
+	return m.clearedproject
 }
 
-// ProjectIDID returns the "project_id" edge ID in the mutation.
-func (m *BillMutation) ProjectIDID() (id int, exists bool) {
-	if m.project_id != nil {
-		return *m.project_id, true
+// ProjectID returns the "project" edge ID in the mutation.
+func (m *BillMutation) ProjectID() (id int, exists bool) {
+	if m.project != nil {
+		return *m.project, true
 	}
 	return
 }
 
-// ProjectIDIDs returns the "project_id" edge IDs in the mutation.
+// ProjectIDs returns the "project" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ProjectIDID instead. It exists only for internal usage by the builders.
-func (m *BillMutation) ProjectIDIDs() (ids []int) {
-	if id := m.project_id; id != nil {
+// ProjectID instead. It exists only for internal usage by the builders.
+func (m *BillMutation) ProjectIDs() (ids []int) {
+	if id := m.project; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetProjectID resets all changes to the "project_id" edge.
-func (m *BillMutation) ResetProjectID() {
-	m.project_id = nil
-	m.clearedproject_id = false
+// ResetProject resets all changes to the "project" edge.
+func (m *BillMutation) ResetProject() {
+	m.project = nil
+	m.clearedproject = false
 }
 
 // SetSrcUserID sets the "src_user" edge to the User entity by id.
@@ -471,8 +471,8 @@ func (m *BillMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *BillMutation) AddedEdges() []string {
 	edges := make([]string, 0, 3)
-	if m.project_id != nil {
-		edges = append(edges, bill.EdgeProjectID)
+	if m.project != nil {
+		edges = append(edges, bill.EdgeProject)
 	}
 	if m.src_user != nil {
 		edges = append(edges, bill.EdgeSrcUser)
@@ -487,8 +487,8 @@ func (m *BillMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *BillMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case bill.EdgeProjectID:
-		if id := m.project_id; id != nil {
+	case bill.EdgeProject:
+		if id := m.project; id != nil {
 			return []ent.Value{*id}
 		}
 	case bill.EdgeSrcUser:
@@ -518,8 +518,8 @@ func (m *BillMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *BillMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 3)
-	if m.clearedproject_id {
-		edges = append(edges, bill.EdgeProjectID)
+	if m.clearedproject {
+		edges = append(edges, bill.EdgeProject)
 	}
 	if m.clearedsrc_user {
 		edges = append(edges, bill.EdgeSrcUser)
@@ -534,8 +534,8 @@ func (m *BillMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *BillMutation) EdgeCleared(name string) bool {
 	switch name {
-	case bill.EdgeProjectID:
-		return m.clearedproject_id
+	case bill.EdgeProject:
+		return m.clearedproject
 	case bill.EdgeSrcUser:
 		return m.clearedsrc_user
 	case bill.EdgeDstUser:
@@ -548,8 +548,8 @@ func (m *BillMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *BillMutation) ClearEdge(name string) error {
 	switch name {
-	case bill.EdgeProjectID:
-		m.ClearProjectID()
+	case bill.EdgeProject:
+		m.ClearProject()
 		return nil
 	case bill.EdgeSrcUser:
 		m.ClearSrcUser()
@@ -565,8 +565,8 @@ func (m *BillMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *BillMutation) ResetEdge(name string) error {
 	switch name {
-	case bill.EdgeProjectID:
-		m.ResetProjectID()
+	case bill.EdgeProject:
+		m.ResetProject()
 		return nil
 	case bill.EdgeSrcUser:
 		m.ResetSrcUser()

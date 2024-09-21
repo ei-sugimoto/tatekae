@@ -14,21 +14,21 @@ const (
 	FieldID = "id"
 	// FieldPrice holds the string denoting the price field in the database.
 	FieldPrice = "price"
-	// EdgeProjectID holds the string denoting the project_id edge name in mutations.
-	EdgeProjectID = "project_id"
+	// EdgeProject holds the string denoting the project edge name in mutations.
+	EdgeProject = "project"
 	// EdgeSrcUser holds the string denoting the src_user edge name in mutations.
 	EdgeSrcUser = "src_user"
 	// EdgeDstUser holds the string denoting the dst_user edge name in mutations.
 	EdgeDstUser = "dst_user"
 	// Table holds the table name of the bill in the database.
 	Table = "bills"
-	// ProjectIDTable is the table that holds the project_id relation/edge.
-	ProjectIDTable = "bills"
-	// ProjectIDInverseTable is the table name for the Project entity.
+	// ProjectTable is the table that holds the project relation/edge.
+	ProjectTable = "bills"
+	// ProjectInverseTable is the table name for the Project entity.
 	// It exists in this package in order to avoid circular dependency with the "project" package.
-	ProjectIDInverseTable = "projects"
-	// ProjectIDColumn is the table column denoting the project_id relation/edge.
-	ProjectIDColumn = "project_bills"
+	ProjectInverseTable = "projects"
+	// ProjectColumn is the table column denoting the project relation/edge.
+	ProjectColumn = "project_bills"
 	// SrcUserTable is the table that holds the src_user relation/edge.
 	SrcUserTable = "bills"
 	// SrcUserInverseTable is the table name for the User entity.
@@ -87,10 +87,10 @@ func ByPrice(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPrice, opts...).ToFunc()
 }
 
-// ByProjectIDField orders the results by project_id field.
-func ByProjectIDField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByProjectField orders the results by project field.
+func ByProjectField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newProjectIDStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newProjectStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -107,11 +107,11 @@ func ByDstUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newDstUserStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newProjectIDStep() *sqlgraph.Step {
+func newProjectStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ProjectIDInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, ProjectIDTable, ProjectIDColumn),
+		sqlgraph.To(ProjectInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ProjectTable, ProjectColumn),
 	)
 }
 func newSrcUserStep() *sqlgraph.Step {

@@ -20,14 +20,14 @@ import (
 // BillQuery is the builder for querying Bill entities.
 type BillQuery struct {
 	config
-	ctx           *QueryContext
-	order         []bill.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.Bill
-	withProjectID *ProjectQuery
-	withSrcUser   *UserQuery
-	withDstUser   *UserQuery
-	withFKs       bool
+	ctx         *QueryContext
+	order       []bill.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.Bill
+	withProject *ProjectQuery
+	withSrcUser *UserQuery
+	withDstUser *UserQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,8 +64,8 @@ func (bq *BillQuery) Order(o ...bill.OrderOption) *BillQuery {
 	return bq
 }
 
-// QueryProjectID chains the current query on the "project_id" edge.
-func (bq *BillQuery) QueryProjectID() *ProjectQuery {
+// QueryProject chains the current query on the "project" edge.
+func (bq *BillQuery) QueryProject() *ProjectQuery {
 	query := (&ProjectClient{config: bq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
@@ -78,7 +78,7 @@ func (bq *BillQuery) QueryProjectID() *ProjectQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(bill.Table, bill.FieldID, selector),
 			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, bill.ProjectIDTable, bill.ProjectIDColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, bill.ProjectTable, bill.ProjectColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -317,28 +317,28 @@ func (bq *BillQuery) Clone() *BillQuery {
 		return nil
 	}
 	return &BillQuery{
-		config:        bq.config,
-		ctx:           bq.ctx.Clone(),
-		order:         append([]bill.OrderOption{}, bq.order...),
-		inters:        append([]Interceptor{}, bq.inters...),
-		predicates:    append([]predicate.Bill{}, bq.predicates...),
-		withProjectID: bq.withProjectID.Clone(),
-		withSrcUser:   bq.withSrcUser.Clone(),
-		withDstUser:   bq.withDstUser.Clone(),
+		config:      bq.config,
+		ctx:         bq.ctx.Clone(),
+		order:       append([]bill.OrderOption{}, bq.order...),
+		inters:      append([]Interceptor{}, bq.inters...),
+		predicates:  append([]predicate.Bill{}, bq.predicates...),
+		withProject: bq.withProject.Clone(),
+		withSrcUser: bq.withSrcUser.Clone(),
+		withDstUser: bq.withDstUser.Clone(),
 		// clone intermediate query.
 		sql:  bq.sql.Clone(),
 		path: bq.path,
 	}
 }
 
-// WithProjectID tells the query-builder to eager-load the nodes that are connected to
-// the "project_id" edge. The optional arguments are used to configure the query builder of the edge.
-func (bq *BillQuery) WithProjectID(opts ...func(*ProjectQuery)) *BillQuery {
+// WithProject tells the query-builder to eager-load the nodes that are connected to
+// the "project" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BillQuery) WithProject(opts ...func(*ProjectQuery)) *BillQuery {
 	query := (&ProjectClient{config: bq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	bq.withProjectID = query
+	bq.withProject = query
 	return bq
 }
 
@@ -444,12 +444,12 @@ func (bq *BillQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bill, e
 		withFKs     = bq.withFKs
 		_spec       = bq.querySpec()
 		loadedTypes = [3]bool{
-			bq.withProjectID != nil,
+			bq.withProject != nil,
 			bq.withSrcUser != nil,
 			bq.withDstUser != nil,
 		}
 	)
-	if bq.withProjectID != nil || bq.withSrcUser != nil || bq.withDstUser != nil {
+	if bq.withProject != nil || bq.withSrcUser != nil || bq.withDstUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -473,9 +473,9 @@ func (bq *BillQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bill, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := bq.withProjectID; query != nil {
-		if err := bq.loadProjectID(ctx, query, nodes, nil,
-			func(n *Bill, e *Project) { n.Edges.ProjectID = e }); err != nil {
+	if query := bq.withProject; query != nil {
+		if err := bq.loadProject(ctx, query, nodes, nil,
+			func(n *Bill, e *Project) { n.Edges.Project = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -494,7 +494,7 @@ func (bq *BillQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bill, e
 	return nodes, nil
 }
 
-func (bq *BillQuery) loadProjectID(ctx context.Context, query *ProjectQuery, nodes []*Bill, init func(*Bill), assign func(*Bill, *Project)) error {
+func (bq *BillQuery) loadProject(ctx context.Context, query *ProjectQuery, nodes []*Bill, init func(*Bill), assign func(*Bill, *Project)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Bill)
 	for i := range nodes {

@@ -325,15 +325,15 @@ func (c *BillClient) GetX(ctx context.Context, id int) *Bill {
 	return obj
 }
 
-// QueryProjectID queries the project_id edge of a Bill.
-func (c *BillClient) QueryProjectID(b *Bill) *ProjectQuery {
+// QueryProject queries the project edge of a Bill.
+func (c *BillClient) QueryProject(b *Bill) *ProjectQuery {
 	query := (&ProjectClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := b.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(bill.Table, bill.FieldID, id),
 			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, bill.ProjectIDTable, bill.ProjectIDColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, bill.ProjectTable, bill.ProjectColumn),
 		)
 		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
 		return fromV, nil
