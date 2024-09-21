@@ -31,3 +31,23 @@ func (p *PersistProject) Create(new *model.Project) (*model.Project, error) {
 		CreatedBy: res.CreatedBy,
 	}, nil
 }
+
+func (p *PersistProject) List() ([]*model.Project, error) {
+	ctx := context.Background()
+	projects, err := p.db.Project.Query().All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]*model.Project, 0, len(projects))
+	for _, project := range projects {
+		res = append(res, &model.Project{
+			ID:        project.ID,
+			Name:      project.Name,
+			CreatedAt: project.CreatedAt,
+			CreatedBy: project.CreatedBy,
+		})
+	}
+
+	return res, nil
+}
