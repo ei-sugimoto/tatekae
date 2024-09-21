@@ -43,14 +43,13 @@ func ParseToken(tokenString string) (jwt.MapClaims, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte("ACCESS_SECRET_KEY"), nil
+		return []byte(KEY), nil
 	})
 
 	if err != nil {
 		return nil, err
 	}
 	claims := token.Claims.(jwt.MapClaims)
-
 	return claims, err
 
 }
@@ -62,7 +61,7 @@ type UserInfo struct {
 }
 
 func GetUserInfo(claims jwt.MapClaims) (*UserInfo, error) {
-	id := (claims)["ID"].(int)
+	id := (claims)["ID"].(float64)
 	username := (claims)["username"].(string)
 	email := (claims)["email"].(string)
 
@@ -72,7 +71,7 @@ func GetUserInfo(claims jwt.MapClaims) (*UserInfo, error) {
 	}
 
 	return &UserInfo{
-		ID:       id,
+		ID:       int(id),
 		Username: username,
 		Email:    email,
 	}, nil
