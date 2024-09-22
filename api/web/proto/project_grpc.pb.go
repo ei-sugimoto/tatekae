@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	ProjectService_Create_FullMethodName = "/protoProject.ProjectService/Create"
 	ProjectService_List_FullMethodName   = "/protoProject.ProjectService/List"
+	ProjectService_Join_FullMethodName   = "/protoProject.ProjectService/Join"
 )
 
 // ProjectServiceClient is the client API for ProjectService service.
@@ -29,6 +30,7 @@ const (
 type ProjectServiceClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
+	Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error)
 }
 
 type projectServiceClient struct {
@@ -59,12 +61,23 @@ func (c *projectServiceClient) List(ctx context.Context, in *ListRequest, opts .
 	return out, nil
 }
 
+func (c *projectServiceClient) Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(JoinResponse)
+	err := c.cc.Invoke(ctx, ProjectService_Join_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectServiceServer is the server API for ProjectService service.
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility.
 type ProjectServiceServer interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	List(context.Context, *ListRequest) (*ListResponse, error)
+	Join(context.Context, *JoinRequest) (*JoinResponse, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedProjectServiceServer) Create(context.Context, *CreateRequest)
 }
 func (UnimplementedProjectServiceServer) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+}
+func (UnimplementedProjectServiceServer) Join(context.Context, *JoinRequest) (*JoinResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Join not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 func (UnimplementedProjectServiceServer) testEmbeddedByValue()                        {}
@@ -138,6 +154,24 @@ func _ProjectService_List_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_Join_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).Join(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_Join_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).Join(ctx, req.(*JoinRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "List",
 			Handler:    _ProjectService_List_Handler,
+		},
+		{
+			MethodName: "Join",
+			Handler:    _ProjectService_Join_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

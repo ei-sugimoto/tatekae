@@ -51,3 +51,13 @@ func (p *PersistProject) List() ([]*model.Project, error) {
 
 	return res, nil
 }
+
+func (p *PersistProject) Join(projectID, userID int) error {
+	ctx := context.Background()
+	_, err := p.db.Project.UpdateOneID(projectID).AddUserIDs(userID).Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -8,6 +8,7 @@ import (
 type IProjectUsecase interface {
 	Create(*model.Project) (*model.Project, error)
 	List() ([]*model.Project, error)
+	Join(int, int) error
 }
 
 type ProjectUsecase struct {
@@ -26,4 +27,8 @@ func (u *ProjectUsecase) Create(project *model.Project) (*model.Project, error) 
 
 func (u *ProjectUsecase) List() ([]*model.Project, error) {
 	return u.repo.List()
+}
+
+func (u *ProjectUsecase) Join(projectID, userID int) error {
+	return u.repo.Join(projectID, userID)
 }

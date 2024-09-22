@@ -54,3 +54,14 @@ func (h *ProjectHandler) List(c context.Context, req *proto.ListRequest) (*proto
 
 	return &proto.ListResponse{Projects: res}, nil
 }
+
+func (h *ProjectHandler) Join(c context.Context, req *proto.JoinRequest) (*proto.JoinResponse, error) {
+	MyID := c.Value("id").(int)
+	MyUsername := c.Value("username").(string)
+	err := h.ProjectUsecase.Join(int(req.Id), MyID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to join project: %v", err)
+	}
+
+	return &proto.JoinResponse{Id: req.Id, Name: MyUsername}, nil
+}
