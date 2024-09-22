@@ -7,6 +7,7 @@ import (
 
 	"github.com/ei-sugimoto/tatekae/api/infrastructure"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/predicate"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/project"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/user"
 	"github.com/ei-sugimoto/tatekae/api/model"
@@ -61,4 +62,36 @@ func (p *PersistBill) Create(new *model.Bill) (*model.Bill, error) {
 		SrcUser:   res.Edges.SrcUser.ID,
 		DstUser:   res.Edges.DstUser.ID,
 	}, nil
+}
+
+func (p *PersistBill) ListByProject(targetID int) ([]*model.Bill, error) {
+	ctx := context.Background()
+
+	existProject, err := p.db.Project.Query().Where(project.ID(targetID)).Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, errors.New("project not found")
+		}
+		return nil, err
+	}
+
+	res, err := p.db.Bill.Query().Where(predicate.Bill(project.ID(existProject.ID))).All(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, errors.New("bill not found")
+		}
+		return nil, err
+	}
+
+	bills := make([]*model.Bill, 0, len(res))
+	for _, v := range res {
+		bills = append(bills, &model.Bill{
+			ID:        v.ID,
+			Price:     v.Price,
+			ProjectID: v.Edges.Project.ID,
+			SrcUser:   v.Edges.SrcUser.ID,
+			DstUser:   v.Edges.DstUser.ID,
+		})
+	}
+	return bills, nil
 }

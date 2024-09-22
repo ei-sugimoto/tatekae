@@ -7,6 +7,7 @@ import (
 
 type IBillUsecase interface {
 	Create(*model.Bill) (*model.Bill, error)
+	ListByProject(int) ([]*model.Bill, error)
 }
 
 type BillUsecase struct {
@@ -21,4 +22,8 @@ func NewBillUsecase(repo repo.BillRepo) IBillUsecase {
 
 func (u *BillUsecase) Create(bill *model.Bill) (*model.Bill, error) {
 	return u.repo.Create(bill)
+}
+
+func (u *BillUsecase) ListByProject(targetID int) ([]*model.Bill, error) {
+	return u.repo.ListByProject(targetID)
 }

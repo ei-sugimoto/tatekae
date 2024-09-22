@@ -6,7 +6,17 @@ option go_package = "./proto";
 
 service BillService {
     rpc Create(CreateBillRequest) returns (CreateBillResponse);
+    rpc ListByProject(ListByProjectRequest) returns (ListByProjectResponse);
 }
+
+message Bill {
+    int32 price = 1;
+    int32 projectId = 2;
+    int32 srcUserId = 3;
+    int32 dstUserId = 4;
+    int32 ID = 5;
+}
+
 
 message CreateBillRequest {
     int32 price = 1;
@@ -21,4 +31,12 @@ message CreateBillResponse {
     int32 srcUserId = 3;
     int32 dstUserId = 4;
     int32 ID = 5;
+}
+
+message ListByProjectRequest {
+    int32 projectId = 1;
+}
+
+message ListByProjectResponse {
+    repeated Bill bills = 1;
 }

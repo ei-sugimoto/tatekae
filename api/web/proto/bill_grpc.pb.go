@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BillService_Create_FullMethodName = "/protoBill.BillService/Create"
+	BillService_Create_FullMethodName        = "/protoBill.BillService/Create"
+	BillService_ListByProject_FullMethodName = "/protoBill.BillService/ListByProject"
 )
 
 // BillServiceClient is the client API for BillService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BillServiceClient interface {
 	Create(ctx context.Context, in *CreateBillRequest, opts ...grpc.CallOption) (*CreateBillResponse, error)
+	ListByProject(ctx context.Context, in *ListByProjectRequest, opts ...grpc.CallOption) (*ListByProjectResponse, error)
 }
 
 type billServiceClient struct {
@@ -47,11 +49,22 @@ func (c *billServiceClient) Create(ctx context.Context, in *CreateBillRequest, o
 	return out, nil
 }
 
+func (c *billServiceClient) ListByProject(ctx context.Context, in *ListByProjectRequest, opts ...grpc.CallOption) (*ListByProjectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListByProjectResponse)
+	err := c.cc.Invoke(ctx, BillService_ListByProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BillServiceServer is the server API for BillService service.
 // All implementations must embed UnimplementedBillServiceServer
 // for forward compatibility.
 type BillServiceServer interface {
 	Create(context.Context, *CreateBillRequest) (*CreateBillResponse, error)
+	ListByProject(context.Context, *ListByProjectRequest) (*ListByProjectResponse, error)
 	mustEmbedUnimplementedBillServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedBillServiceServer struct{}
 
 func (UnimplementedBillServiceServer) Create(context.Context, *CreateBillRequest) (*CreateBillResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedBillServiceServer) ListByProject(context.Context, *ListByProjectRequest) (*ListByProjectResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListByProject not implemented")
 }
 func (UnimplementedBillServiceServer) mustEmbedUnimplementedBillServiceServer() {}
 func (UnimplementedBillServiceServer) testEmbeddedByValue()                     {}
@@ -104,6 +120,24 @@ func _BillService_Create_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillService_ListByProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListByProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillServiceServer).ListByProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillService_ListByProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillServiceServer).ListByProject(ctx, req.(*ListByProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BillService_ServiceDesc is the grpc.ServiceDesc for BillService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var BillService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Create",
 			Handler:    _BillService_Create_Handler,
+		},
+		{
+			MethodName: "ListByProject",
+			Handler:    _BillService_ListByProject_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
