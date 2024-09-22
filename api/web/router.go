@@ -3,6 +3,7 @@ package web
 import (
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 
@@ -10,24 +11,17 @@ import (
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/persistence"
 	"github.com/ei-sugimoto/tatekae/api/usecase"
 	"github.com/ei-sugimoto/tatekae/api/web/handler"
-	"github.com/ei-sugimoto/tatekae/api/web/middleware"
 	"github.com/ei-sugimoto/tatekae/api/web/proto"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type Router struct {
-	Engine *grpc.Server
+	Engine *http.ServeMux
 	Port   string
 }
 
 func NewRouter() *Router {
-	engine := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(
-			middleware.UnaryLoggingInterceptor(),
-			middleware.AuthUnaryInterceptor,
-		),
-	)
+	engine := http.NewServeMux()
 	return &Router{Engine: engine}
 }
 

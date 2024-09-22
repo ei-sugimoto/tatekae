@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package proto_project.v1;
+
+option go_package = "github.com/ei-sugimoto/tatekae/api/gen/proto_project/v1;projectv1";
+
+service ProjectService {
+  rpc Create(ProjectServiceCreateRequest) returns (ProjectServiceCreateResponse);
+  rpc List(ProjectServiceListRequest) returns (ProjectServiceListResponse);
+  rpc Join(ProjectServiceJoinRequest) returns (ProjectServiceJoinResponse);
+}
+
+message Project {
+  int32 id = 1;
+  string name = 2;
+}
+
+message ProjectServiceCreateRequest {
+  string name = 1;
+}
+
+message ProjectServiceCreateResponse {
+  int32 id = 1;
+  string name = 2;
+}
+
+message ProjectServiceListRequest {}
+
+message ProjectServiceListResponse {
+  repeated Project projects = 1;
+}
+
+message ProjectServiceJoinRequest {
+  int32 id = 1;
+}
+
+message ProjectServiceJoinResponse {
+  int32 id = 1;
+  string name = 2;
+}

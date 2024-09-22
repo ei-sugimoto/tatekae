@@ -2,10 +2,13 @@ import { useState } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
+import { createConnectTransport } from '@connectrpc/connect-web';
+import { createPromiseClient } from '@connectrpc/connect';
+import { UserService } from './gen/user_connect';
 
 function App() {
   const [count, setCount] = useState(0);
-
+  Register();
   return (
     <>
       <div>
@@ -16,7 +19,7 @@ function App() {
           <img src={reactLogo} className='logo react' alt='React logo' />
         </a>
       </div>
-      <h1>Vite</h1>
+      <h1>Vite + React</h1>
       <div className='card'>
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
@@ -33,3 +36,18 @@ function App() {
 }
 
 export default App;
+
+const Register = async () => {
+  const transport = createConnectTransport({
+    baseUrl: 'http://api:8080',
+  });
+
+  const client = createPromiseClient(UserService, transport);
+  const res = await client.register({
+    email: 'test',
+    password: 'test',
+    username: 'test',
+  });
+
+  console.log(res);
+};
