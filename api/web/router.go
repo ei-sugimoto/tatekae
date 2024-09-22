@@ -96,7 +96,8 @@ func (r *Router) NewBillService() {
 
 	db := infrastructure.NewDB()
 	billPersistence := persistence.NewPersistBill(db)
-	billUsecase := usecase.NewBillUsecase(billPersistence)
+	billPersistenceUser := persistence.NewPersistUser(db)
+	billUsecase := usecase.NewBillUsecase(billPersistence, billPersistenceUser)
 	billHandler := handler.NewBillHandler(billUsecase)
 
 	proto.RegisterBillServiceServer(r.Engine, billHandler)

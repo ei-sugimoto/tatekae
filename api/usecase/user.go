@@ -33,3 +33,7 @@ func (u *UserUsecase) Get(id int) (*model.User, *pkg.CustomErr) {
 func (u *UserUsecase) Login(email, password string) (*model.User, *pkg.CustomErr) {
 	return u.repo.Login(email, password)
 }
+
+func (u *UserUsecase) ListByIDs(ids []int) ([]*model.User, error) {
+	return u.repo.ListByIDs(ids)
+}

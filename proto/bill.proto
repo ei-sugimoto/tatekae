@@ -7,6 +7,7 @@ option go_package = "./proto";
 service BillService {
     rpc Create(CreateBillRequest) returns (CreateBillResponse);
     rpc ListByProject(ListByProjectRequest) returns (ListByProjectResponse);
+    rpc SumrizeByProject(SumrizeRequest) returns (SumrizeResponse);
 }
 
 message Bill {
@@ -15,6 +16,12 @@ message Bill {
     int32 srcUserId = 3;
     int32 dstUserId = 4;
     int32 ID = 5;
+}
+
+message SumrizeBill {
+    string srcUserName = 1;
+    string dstUserName = 2;
+    int32 price = 3;
 }
 
 
@@ -39,4 +46,12 @@ message ListByProjectRequest {
 
 message ListByProjectResponse {
     repeated Bill bills = 1;
+}
+
+message SumrizeRequest {
+    int32 projectId = 1;
+}
+
+message SumrizeResponse {
+    repeated SumrizeBill sumrizeBills = 1;
 }

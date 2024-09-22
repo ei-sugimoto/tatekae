@@ -19,12 +19,20 @@ type Transaction struct {
 	Amount  int
 }
 
+type SumarizeBill struct {
+	DstUserName string
+	SrcUserName string
+	Amount      int
+}
+
+type SumarizeBills []SumarizeBill
+
 type PersonBlance struct {
 	UserID  int
 	Balance int
 }
 
-func CalcucateSummaries(bills []Bill) ([]Transaction, error) {
+func CalcucateSummaries(bills []*Bill) ([]Transaction, error) {
 
 	if len(bills) == 0 {
 		return nil, errors.New("no bills")

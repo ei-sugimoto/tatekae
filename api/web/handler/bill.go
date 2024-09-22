@@ -64,3 +64,23 @@ func (h *BillHandler) ListByProject(c context.Context, req *proto.ListByProjectR
 		Bills: bills,
 	}, nil
 }
+
+func (h *BillHandler) SumrizeByProject(c context.Context, req *proto.SumrizeRequest) (*proto.SumrizeResponse, error) {
+	res, err := h.u.Sumarize(int(req.ProjectId))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to sumarize project: %v", err)
+	}
+
+	sumarize := make([]*proto.SumrizeBill, 0, len(res))
+	for _, v := range res {
+		sumarize = append(sumarize, &proto.SumrizeBill{
+			SrcUserName: v.SrcUserName,
+			DstUserName: v.DstUserName,
+			Price:       int32(v.Amount),
+		})
+	}
+
+	return &proto.SumrizeResponse{
+		SumrizeBills: sumarize,
+	}, nil
+}

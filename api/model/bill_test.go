@@ -10,19 +10,19 @@ import (
 func TestCalucateSummaries(t *testing.T) {
 	tests := []struct {
 		name    string
-		bills   []model.Bill
+		bills   []*model.Bill
 		want    []model.Transaction
 		wantErr bool
 	}{
 		{
 			name:    "No bills",
-			bills:   []model.Bill{},
+			bills:   []*model.Bill{},
 			want:    []model.Transaction{},
 			wantErr: true,
 		},
 		{
 			name: "Single bill",
-			bills: []model.Bill{
+			bills: []*model.Bill{
 				{Price: 100, SrcUser: 1, DstUser: 2},
 			},
 			want: []model.Transaction{
@@ -32,7 +32,7 @@ func TestCalucateSummaries(t *testing.T) {
 		},
 		{
 			name: "Multiple bills",
-			bills: []model.Bill{
+			bills: []*model.Bill{
 				{Price: 100, SrcUser: 1, DstUser: 2},
 				{Price: 200, SrcUser: 2, DstUser: 3},
 				{Price: 300, SrcUser: 3, DstUser: 1},
@@ -45,7 +45,7 @@ func TestCalucateSummaries(t *testing.T) {
 		},
 		{
 			name: "Complex transactions",
-			bills: []model.Bill{
+			bills: []*model.Bill{
 				{Price: 100, SrcUser: 1, DstUser: 2},
 				{Price: 150, SrcUser: 2, DstUser: 3},
 				{Price: 200, SrcUser: 3, DstUser: 1},

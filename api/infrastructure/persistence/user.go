@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 
 	"github.com/ei-sugimoto/tatekae/api/infrastructure"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/user"
@@ -95,4 +96,26 @@ func (p *PersistUser) Login(email, password string) (*model.User, *pkg.CustomErr
 		CreateAt: res.CreatedAt,
 		Password: res.Password,
 	}, nil
+}
+
+func (p *PersistUser) ListByIDs(ids []int) ([]*model.User, error) {
+	ctx := context.Background()
+	res, err := p.db.User.Query().Where(user.IDIn(ids...)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	log.Println(res)
+
+	users := make([]*model.User, len(res))
+	for i, u := range res {
+		users[i] = &model.User{
+			ID:       u.ID,
+			Username: u.Username,
+			Email:    u.Email,
+			CreateAt: u.CreatedAt,
+			Password: u.Password,
+		}
+	}
+
+	return users, nil
 }

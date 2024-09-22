@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BillService_Create_FullMethodName        = "/protoBill.BillService/Create"
-	BillService_ListByProject_FullMethodName = "/protoBill.BillService/ListByProject"
+	BillService_Create_FullMethodName           = "/protoBill.BillService/Create"
+	BillService_ListByProject_FullMethodName    = "/protoBill.BillService/ListByProject"
+	BillService_SumrizeByProject_FullMethodName = "/protoBill.BillService/SumrizeByProject"
 )
 
 // BillServiceClient is the client API for BillService service.
@@ -29,6 +30,7 @@ const (
 type BillServiceClient interface {
 	Create(ctx context.Context, in *CreateBillRequest, opts ...grpc.CallOption) (*CreateBillResponse, error)
 	ListByProject(ctx context.Context, in *ListByProjectRequest, opts ...grpc.CallOption) (*ListByProjectResponse, error)
+	SumrizeByProject(ctx context.Context, in *SumrizeRequest, opts ...grpc.CallOption) (*SumrizeResponse, error)
 }
 
 type billServiceClient struct {
@@ -59,12 +61,23 @@ func (c *billServiceClient) ListByProject(ctx context.Context, in *ListByProject
 	return out, nil
 }
 
+func (c *billServiceClient) SumrizeByProject(ctx context.Context, in *SumrizeRequest, opts ...grpc.CallOption) (*SumrizeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SumrizeResponse)
+	err := c.cc.Invoke(ctx, BillService_SumrizeByProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BillServiceServer is the server API for BillService service.
 // All implementations must embed UnimplementedBillServiceServer
 // for forward compatibility.
 type BillServiceServer interface {
 	Create(context.Context, *CreateBillRequest) (*CreateBillResponse, error)
 	ListByProject(context.Context, *ListByProjectRequest) (*ListByProjectResponse, error)
+	SumrizeByProject(context.Context, *SumrizeRequest) (*SumrizeResponse, error)
 	mustEmbedUnimplementedBillServiceServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedBillServiceServer) Create(context.Context, *CreateBillRequest
 }
 func (UnimplementedBillServiceServer) ListByProject(context.Context, *ListByProjectRequest) (*ListByProjectResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListByProject not implemented")
+}
+func (UnimplementedBillServiceServer) SumrizeByProject(context.Context, *SumrizeRequest) (*SumrizeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SumrizeByProject not implemented")
 }
 func (UnimplementedBillServiceServer) mustEmbedUnimplementedBillServiceServer() {}
 func (UnimplementedBillServiceServer) testEmbeddedByValue()                     {}
@@ -138,6 +154,24 @@ func _BillService_ListByProject_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillService_SumrizeByProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SumrizeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillServiceServer).SumrizeByProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillService_SumrizeByProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillServiceServer).SumrizeByProject(ctx, req.(*SumrizeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BillService_ServiceDesc is the grpc.ServiceDesc for BillService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var BillService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListByProject",
 			Handler:    _BillService_ListByProject_Handler,
+		},
+		{
+			MethodName: "SumrizeByProject",
+			Handler:    _BillService_SumrizeByProject_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
