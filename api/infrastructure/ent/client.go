@@ -349,7 +349,7 @@ func (c *BillClient) QuerySrcUser(b *Bill) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(bill.Table, bill.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, bill.SrcUserTable, bill.SrcUserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, bill.SrcUserTable, bill.SrcUserColumn),
 		)
 		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
 		return fromV, nil
@@ -365,7 +365,7 @@ func (c *BillClient) QueryDstUser(b *Bill) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(bill.Table, bill.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, bill.DstUserTable, bill.DstUserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, bill.DstUserTable, bill.DstUserColumn),
 		)
 		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
 		return fromV, nil
@@ -687,15 +687,15 @@ func (c *UserClient) QueryProjects(u *User) *ProjectQuery {
 	return query
 }
 
-// QuerySrcBill queries the src_bill edge of a User.
-func (c *UserClient) QuerySrcBill(u *User) *BillQuery {
+// QuerySrcBills queries the src_bills edge of a User.
+func (c *UserClient) QuerySrcBills(u *User) *BillQuery {
 	query := (&BillClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(bill.Table, bill.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, user.SrcBillTable, user.SrcBillColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SrcBillsTable, user.SrcBillsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -703,15 +703,15 @@ func (c *UserClient) QuerySrcBill(u *User) *BillQuery {
 	return query
 }
 
-// QueryDstBill queries the dst_bill edge of a User.
-func (c *UserClient) QueryDstBill(u *User) *BillQuery {
+// QueryDstBills queries the dst_bills edge of a User.
+func (c *UserClient) QueryDstBills(u *User) *BillQuery {
 	query := (&BillClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(bill.Table, bill.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, user.DstBillTable, user.DstBillColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DstBillsTable, user.DstBillsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

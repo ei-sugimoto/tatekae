@@ -333,21 +333,21 @@ func HasProjectsWith(preds ...predicate.Project) predicate.User {
 	})
 }
 
-// HasSrcBill applies the HasEdge predicate on the "src_bill" edge.
-func HasSrcBill() predicate.User {
+// HasSrcBills applies the HasEdge predicate on the "src_bills" edge.
+func HasSrcBills() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, SrcBillTable, SrcBillColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, SrcBillsTable, SrcBillsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSrcBillWith applies the HasEdge predicate on the "src_bill" edge with a given conditions (other predicates).
-func HasSrcBillWith(preds ...predicate.Bill) predicate.User {
+// HasSrcBillsWith applies the HasEdge predicate on the "src_bills" edge with a given conditions (other predicates).
+func HasSrcBillsWith(preds ...predicate.Bill) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newSrcBillStep()
+		step := newSrcBillsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -356,21 +356,21 @@ func HasSrcBillWith(preds ...predicate.Bill) predicate.User {
 	})
 }
 
-// HasDstBill applies the HasEdge predicate on the "dst_bill" edge.
-func HasDstBill() predicate.User {
+// HasDstBills applies the HasEdge predicate on the "dst_bills" edge.
+func HasDstBills() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, DstBillTable, DstBillColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, DstBillsTable, DstBillsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasDstBillWith applies the HasEdge predicate on the "dst_bill" edge with a given conditions (other predicates).
-func HasDstBillWith(preds ...predicate.Bill) predicate.User {
+// HasDstBillsWith applies the HasEdge predicate on the "dst_bills" edge with a given conditions (other predicates).
+func HasDstBillsWith(preds ...predicate.Bill) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newDstBillStep()
+		step := newDstBillsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

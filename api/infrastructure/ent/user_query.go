@@ -26,8 +26,8 @@ type UserQuery struct {
 	inters       []Interceptor
 	predicates   []predicate.User
 	withProjects *ProjectQuery
-	withSrcBill  *BillQuery
-	withDstBill  *BillQuery
+	withSrcBills *BillQuery
+	withDstBills *BillQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -86,8 +86,8 @@ func (uq *UserQuery) QueryProjects() *ProjectQuery {
 	return query
 }
 
-// QuerySrcBill chains the current query on the "src_bill" edge.
-func (uq *UserQuery) QuerySrcBill() *BillQuery {
+// QuerySrcBills chains the current query on the "src_bills" edge.
+func (uq *UserQuery) QuerySrcBills() *BillQuery {
 	query := (&BillClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
@@ -100,7 +100,7 @@ func (uq *UserQuery) QuerySrcBill() *BillQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(bill.Table, bill.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, user.SrcBillTable, user.SrcBillColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SrcBillsTable, user.SrcBillsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -108,8 +108,8 @@ func (uq *UserQuery) QuerySrcBill() *BillQuery {
 	return query
 }
 
-// QueryDstBill chains the current query on the "dst_bill" edge.
-func (uq *UserQuery) QueryDstBill() *BillQuery {
+// QueryDstBills chains the current query on the "dst_bills" edge.
+func (uq *UserQuery) QueryDstBills() *BillQuery {
 	query := (&BillClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
@@ -122,7 +122,7 @@ func (uq *UserQuery) QueryDstBill() *BillQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(bill.Table, bill.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, user.DstBillTable, user.DstBillColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DstBillsTable, user.DstBillsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -323,8 +323,8 @@ func (uq *UserQuery) Clone() *UserQuery {
 		inters:       append([]Interceptor{}, uq.inters...),
 		predicates:   append([]predicate.User{}, uq.predicates...),
 		withProjects: uq.withProjects.Clone(),
-		withSrcBill:  uq.withSrcBill.Clone(),
-		withDstBill:  uq.withDstBill.Clone(),
+		withSrcBills: uq.withSrcBills.Clone(),
+		withDstBills: uq.withDstBills.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -342,25 +342,25 @@ func (uq *UserQuery) WithProjects(opts ...func(*ProjectQuery)) *UserQuery {
 	return uq
 }
 
-// WithSrcBill tells the query-builder to eager-load the nodes that are connected to
-// the "src_bill" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithSrcBill(opts ...func(*BillQuery)) *UserQuery {
+// WithSrcBills tells the query-builder to eager-load the nodes that are connected to
+// the "src_bills" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithSrcBills(opts ...func(*BillQuery)) *UserQuery {
 	query := (&BillClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withSrcBill = query
+	uq.withSrcBills = query
 	return uq
 }
 
-// WithDstBill tells the query-builder to eager-load the nodes that are connected to
-// the "dst_bill" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithDstBill(opts ...func(*BillQuery)) *UserQuery {
+// WithDstBills tells the query-builder to eager-load the nodes that are connected to
+// the "dst_bills" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithDstBills(opts ...func(*BillQuery)) *UserQuery {
 	query := (&BillClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withDstBill = query
+	uq.withDstBills = query
 	return uq
 }
 
@@ -444,8 +444,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		_spec       = uq.querySpec()
 		loadedTypes = [3]bool{
 			uq.withProjects != nil,
-			uq.withSrcBill != nil,
-			uq.withDstBill != nil,
+			uq.withSrcBills != nil,
+			uq.withDstBills != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -473,15 +473,17 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := uq.withSrcBill; query != nil {
-		if err := uq.loadSrcBill(ctx, query, nodes, nil,
-			func(n *User, e *Bill) { n.Edges.SrcBill = e }); err != nil {
+	if query := uq.withSrcBills; query != nil {
+		if err := uq.loadSrcBills(ctx, query, nodes,
+			func(n *User) { n.Edges.SrcBills = []*Bill{} },
+			func(n *User, e *Bill) { n.Edges.SrcBills = append(n.Edges.SrcBills, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := uq.withDstBill; query != nil {
-		if err := uq.loadDstBill(ctx, query, nodes, nil,
-			func(n *User, e *Bill) { n.Edges.DstBill = e }); err != nil {
+	if query := uq.withDstBills; query != nil {
+		if err := uq.loadDstBills(ctx, query, nodes,
+			func(n *User) { n.Edges.DstBills = []*Bill{} },
+			func(n *User, e *Bill) { n.Edges.DstBills = append(n.Edges.DstBills, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -549,57 +551,63 @@ func (uq *UserQuery) loadProjects(ctx context.Context, query *ProjectQuery, node
 	}
 	return nil
 }
-func (uq *UserQuery) loadSrcBill(ctx context.Context, query *BillQuery, nodes []*User, init func(*User), assign func(*User, *Bill)) error {
+func (uq *UserQuery) loadSrcBills(ctx context.Context, query *BillQuery, nodes []*User, init func(*User), assign func(*User, *Bill)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.withFKs = true
 	query.Where(predicate.Bill(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.SrcBillColumn), fks...))
+		s.Where(sql.InValues(s.C(user.SrcBillsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_src_bill
+		fk := n.user_src_bills
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_src_bill" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "user_src_bills" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_src_bill" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_src_bills" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
 	return nil
 }
-func (uq *UserQuery) loadDstBill(ctx context.Context, query *BillQuery, nodes []*User, init func(*User), assign func(*User, *Bill)) error {
+func (uq *UserQuery) loadDstBills(ctx context.Context, query *BillQuery, nodes []*User, init func(*User), assign func(*User, *Bill)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.withFKs = true
 	query.Where(predicate.Bill(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.DstBillColumn), fks...))
+		s.Where(sql.InValues(s.C(user.DstBillsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_dst_bill
+		fk := n.user_dst_bills
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_dst_bill" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "user_dst_bills" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_dst_bill" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_dst_bills" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

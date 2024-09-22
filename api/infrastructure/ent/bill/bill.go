@@ -35,14 +35,14 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	SrcUserInverseTable = "users"
 	// SrcUserColumn is the table column denoting the src_user relation/edge.
-	SrcUserColumn = "user_src_bill"
+	SrcUserColumn = "user_src_bills"
 	// DstUserTable is the table that holds the dst_user relation/edge.
 	DstUserTable = "bills"
 	// DstUserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	DstUserInverseTable = "users"
 	// DstUserColumn is the table column denoting the dst_user relation/edge.
-	DstUserColumn = "user_dst_bill"
+	DstUserColumn = "user_dst_bills"
 )
 
 // Columns holds all SQL columns for bill fields.
@@ -55,8 +55,8 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"project_bills",
-	"user_src_bill",
-	"user_dst_bill",
+	"user_src_bills",
+	"user_dst_bills",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -118,13 +118,13 @@ func newSrcUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SrcUserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, SrcUserTable, SrcUserColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, SrcUserTable, SrcUserColumn),
 	)
 }
 func newDstUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(DstUserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, DstUserTable, DstUserColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, DstUserTable, DstUserColumn),
 	)
 }

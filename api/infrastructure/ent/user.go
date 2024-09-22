@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/bill"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/user"
 )
 
@@ -36,10 +35,10 @@ type User struct {
 type UserEdges struct {
 	// Projects holds the value of the projects edge.
 	Projects []*Project `json:"projects,omitempty"`
-	// SrcBill holds the value of the src_bill edge.
-	SrcBill *Bill `json:"src_bill,omitempty"`
-	// DstBill holds the value of the dst_bill edge.
-	DstBill *Bill `json:"dst_bill,omitempty"`
+	// SrcBills holds the value of the src_bills edge.
+	SrcBills []*Bill `json:"src_bills,omitempty"`
+	// DstBills holds the value of the dst_bills edge.
+	DstBills []*Bill `json:"dst_bills,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -54,26 +53,22 @@ func (e UserEdges) ProjectsOrErr() ([]*Project, error) {
 	return nil, &NotLoadedError{edge: "projects"}
 }
 
-// SrcBillOrErr returns the SrcBill value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) SrcBillOrErr() (*Bill, error) {
-	if e.SrcBill != nil {
-		return e.SrcBill, nil
-	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: bill.Label}
+// SrcBillsOrErr returns the SrcBills value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SrcBillsOrErr() ([]*Bill, error) {
+	if e.loadedTypes[1] {
+		return e.SrcBills, nil
 	}
-	return nil, &NotLoadedError{edge: "src_bill"}
+	return nil, &NotLoadedError{edge: "src_bills"}
 }
 
-// DstBillOrErr returns the DstBill value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) DstBillOrErr() (*Bill, error) {
-	if e.DstBill != nil {
-		return e.DstBill, nil
-	} else if e.loadedTypes[2] {
-		return nil, &NotFoundError{label: bill.Label}
+// DstBillsOrErr returns the DstBills value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) DstBillsOrErr() ([]*Bill, error) {
+	if e.loadedTypes[2] {
+		return e.DstBills, nil
 	}
-	return nil, &NotLoadedError{edge: "dst_bill"}
+	return nil, &NotLoadedError{edge: "dst_bills"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -150,14 +145,14 @@ func (u *User) QueryProjects() *ProjectQuery {
 	return NewUserClient(u.config).QueryProjects(u)
 }
 
-// QuerySrcBill queries the "src_bill" edge of the User entity.
-func (u *User) QuerySrcBill() *BillQuery {
-	return NewUserClient(u.config).QuerySrcBill(u)
+// QuerySrcBills queries the "src_bills" edge of the User entity.
+func (u *User) QuerySrcBills() *BillQuery {
+	return NewUserClient(u.config).QuerySrcBills(u)
 }
 
-// QueryDstBill queries the "dst_bill" edge of the User entity.
-func (u *User) QueryDstBill() *BillQuery {
-	return NewUserClient(u.config).QueryDstBill(u)
+// QueryDstBills queries the "dst_bills" edge of the User entity.
+func (u *User) QueryDstBills() *BillQuery {
+	return NewUserClient(u.config).QueryDstBills(u)
 }
 
 // Update returns a builder for updating this User.

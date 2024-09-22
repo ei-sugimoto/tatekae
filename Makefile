@@ -10,3 +10,19 @@ entgen:
 new-schema:
 	cd api/infrastructure && test -n "$(name)" || (echo "name is not set" && exit 1)
 	cd api/infrastructure && go run -mod=mod entgo.io/ent/cmd/ent new $(name)
+
+.PHONY: up
+up:
+	docker compose up
+
+.PHONY: down
+down:
+	docker compose down
+
+.PHONY: up-build
+up-build:
+	docker compose up --build
+
+.PHONY: down-vol
+down-vol:
+	docker compose down -v

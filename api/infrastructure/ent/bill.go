@@ -22,11 +22,11 @@ type Bill struct {
 	Price int `json:"price,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BillQuery when eager-loading is set.
-	Edges         BillEdges `json:"edges"`
-	project_bills *int
-	user_src_bill *int
-	user_dst_bill *int
-	selectValues  sql.SelectValues
+	Edges          BillEdges `json:"edges"`
+	project_bills  *int
+	user_src_bills *int
+	user_dst_bills *int
+	selectValues   sql.SelectValues
 }
 
 // BillEdges holds the relations/edges for other nodes in the graph.
@@ -84,9 +84,9 @@ func (*Bill) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case bill.ForeignKeys[0]: // project_bills
 			values[i] = new(sql.NullInt64)
-		case bill.ForeignKeys[1]: // user_src_bill
+		case bill.ForeignKeys[1]: // user_src_bills
 			values[i] = new(sql.NullInt64)
-		case bill.ForeignKeys[2]: // user_dst_bill
+		case bill.ForeignKeys[2]: // user_dst_bills
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -124,17 +124,17 @@ func (b *Bill) assignValues(columns []string, values []any) error {
 			}
 		case bill.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_src_bill", value)
+				return fmt.Errorf("unexpected type %T for edge-field user_src_bills", value)
 			} else if value.Valid {
-				b.user_src_bill = new(int)
-				*b.user_src_bill = int(value.Int64)
+				b.user_src_bills = new(int)
+				*b.user_src_bills = int(value.Int64)
 			}
 		case bill.ForeignKeys[2]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_dst_bill", value)
+				return fmt.Errorf("unexpected type %T for edge-field user_dst_bills", value)
 			} else if value.Valid {
-				b.user_dst_bill = new(int)
-				*b.user_dst_bill = int(value.Int64)
+				b.user_dst_bills = new(int)
+				*b.user_dst_bills = int(value.Int64)
 			}
 		default:
 			b.selectValues.Set(columns[i], values[i])

@@ -126,7 +126,7 @@ func HasSrcUser() predicate.Bill {
 	return predicate.Bill(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, SrcUserTable, SrcUserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, SrcUserTable, SrcUserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -149,7 +149,7 @@ func HasDstUser() predicate.Bill {
 	return predicate.Bill(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, DstUserTable, DstUserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, DstUserTable, DstUserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

@@ -61,42 +61,34 @@ func (uc *UserCreate) AddProjects(p ...*Project) *UserCreate {
 	return uc.AddProjectIDs(ids...)
 }
 
-// SetSrcBillID sets the "src_bill" edge to the Bill entity by ID.
-func (uc *UserCreate) SetSrcBillID(id int) *UserCreate {
-	uc.mutation.SetSrcBillID(id)
+// AddSrcBillIDs adds the "src_bills" edge to the Bill entity by IDs.
+func (uc *UserCreate) AddSrcBillIDs(ids ...int) *UserCreate {
+	uc.mutation.AddSrcBillIDs(ids...)
 	return uc
 }
 
-// SetNillableSrcBillID sets the "src_bill" edge to the Bill entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableSrcBillID(id *int) *UserCreate {
-	if id != nil {
-		uc = uc.SetSrcBillID(*id)
+// AddSrcBills adds the "src_bills" edges to the Bill entity.
+func (uc *UserCreate) AddSrcBills(b ...*Bill) *UserCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
 	}
+	return uc.AddSrcBillIDs(ids...)
+}
+
+// AddDstBillIDs adds the "dst_bills" edge to the Bill entity by IDs.
+func (uc *UserCreate) AddDstBillIDs(ids ...int) *UserCreate {
+	uc.mutation.AddDstBillIDs(ids...)
 	return uc
 }
 
-// SetSrcBill sets the "src_bill" edge to the Bill entity.
-func (uc *UserCreate) SetSrcBill(b *Bill) *UserCreate {
-	return uc.SetSrcBillID(b.ID)
-}
-
-// SetDstBillID sets the "dst_bill" edge to the Bill entity by ID.
-func (uc *UserCreate) SetDstBillID(id int) *UserCreate {
-	uc.mutation.SetDstBillID(id)
-	return uc
-}
-
-// SetNillableDstBillID sets the "dst_bill" edge to the Bill entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableDstBillID(id *int) *UserCreate {
-	if id != nil {
-		uc = uc.SetDstBillID(*id)
+// AddDstBills adds the "dst_bills" edges to the Bill entity.
+func (uc *UserCreate) AddDstBills(b ...*Bill) *UserCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
 	}
-	return uc
-}
-
-// SetDstBill sets the "dst_bill" edge to the Bill entity.
-func (uc *UserCreate) SetDstBill(b *Bill) *UserCreate {
-	return uc.SetDstBillID(b.ID)
+	return uc.AddDstBillIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -203,12 +195,12 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.SrcBillIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.SrcBillsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SrcBillTable,
-			Columns: []string{user.SrcBillColumn},
+			Table:   user.SrcBillsTable,
+			Columns: []string{user.SrcBillsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
@@ -219,12 +211,12 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.DstBillIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.DstBillsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.DstBillTable,
-			Columns: []string{user.DstBillColumn},
+			Table:   user.DstBillsTable,
+			Columns: []string{user.DstBillsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),

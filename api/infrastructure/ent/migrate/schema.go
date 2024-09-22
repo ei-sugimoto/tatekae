@@ -13,8 +13,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "price", Type: field.TypeInt},
 		{Name: "project_bills", Type: field.TypeInt, Nullable: true},
-		{Name: "user_src_bill", Type: field.TypeInt, Unique: true, Nullable: true},
-		{Name: "user_dst_bill", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "user_src_bills", Type: field.TypeInt},
+		{Name: "user_dst_bills", Type: field.TypeInt},
 	}
 	// BillsTable holds the schema information for the "bills" table.
 	BillsTable = &schema.Table{
@@ -29,16 +29,16 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "bills_users_src_bill",
+				Symbol:     "bills_users_src_bills",
 				Columns:    []*schema.Column{BillsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "bills_users_dst_bill",
+				Symbol:     "bills_users_dst_bills",
 				Columns:    []*schema.Column{BillsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}

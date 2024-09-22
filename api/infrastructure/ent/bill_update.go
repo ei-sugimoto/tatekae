@@ -75,14 +75,6 @@ func (bu *BillUpdate) SetSrcUserID(id int) *BillUpdate {
 	return bu
 }
 
-// SetNillableSrcUserID sets the "src_user" edge to the User entity by ID if the given value is not nil.
-func (bu *BillUpdate) SetNillableSrcUserID(id *int) *BillUpdate {
-	if id != nil {
-		bu = bu.SetSrcUserID(*id)
-	}
-	return bu
-}
-
 // SetSrcUser sets the "src_user" edge to the User entity.
 func (bu *BillUpdate) SetSrcUser(u *User) *BillUpdate {
 	return bu.SetSrcUserID(u.ID)
@@ -91,14 +83,6 @@ func (bu *BillUpdate) SetSrcUser(u *User) *BillUpdate {
 // SetDstUserID sets the "dst_user" edge to the User entity by ID.
 func (bu *BillUpdate) SetDstUserID(id int) *BillUpdate {
 	bu.mutation.SetDstUserID(id)
-	return bu
-}
-
-// SetNillableDstUserID sets the "dst_user" edge to the User entity by ID if the given value is not nil.
-func (bu *BillUpdate) SetNillableDstUserID(id *int) *BillUpdate {
-	if id != nil {
-		bu = bu.SetDstUserID(*id)
-	}
 	return bu
 }
 
@@ -157,7 +141,21 @@ func (bu *BillUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (bu *BillUpdate) check() error {
+	if bu.mutation.SrcUserCleared() && len(bu.mutation.SrcUserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Bill.src_user"`)
+	}
+	if bu.mutation.DstUserCleared() && len(bu.mutation.DstUserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Bill.dst_user"`)
+	}
+	return nil
+}
+
 func (bu *BillUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := bu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(bill.Table, bill.Columns, sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt))
 	if ps := bu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -203,7 +201,7 @@ func (bu *BillUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if bu.mutation.SrcUserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   bill.SrcUserTable,
 			Columns: []string{bill.SrcUserColumn},
@@ -216,7 +214,7 @@ func (bu *BillUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := bu.mutation.SrcUserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   bill.SrcUserTable,
 			Columns: []string{bill.SrcUserColumn},
@@ -232,7 +230,7 @@ func (bu *BillUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if bu.mutation.DstUserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   bill.DstUserTable,
 			Columns: []string{bill.DstUserColumn},
@@ -245,7 +243,7 @@ func (bu *BillUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := bu.mutation.DstUserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   bill.DstUserTable,
 			Columns: []string{bill.DstUserColumn},
@@ -325,14 +323,6 @@ func (buo *BillUpdateOne) SetSrcUserID(id int) *BillUpdateOne {
 	return buo
 }
 
-// SetNillableSrcUserID sets the "src_user" edge to the User entity by ID if the given value is not nil.
-func (buo *BillUpdateOne) SetNillableSrcUserID(id *int) *BillUpdateOne {
-	if id != nil {
-		buo = buo.SetSrcUserID(*id)
-	}
-	return buo
-}
-
 // SetSrcUser sets the "src_user" edge to the User entity.
 func (buo *BillUpdateOne) SetSrcUser(u *User) *BillUpdateOne {
 	return buo.SetSrcUserID(u.ID)
@@ -341,14 +331,6 @@ func (buo *BillUpdateOne) SetSrcUser(u *User) *BillUpdateOne {
 // SetDstUserID sets the "dst_user" edge to the User entity by ID.
 func (buo *BillUpdateOne) SetDstUserID(id int) *BillUpdateOne {
 	buo.mutation.SetDstUserID(id)
-	return buo
-}
-
-// SetNillableDstUserID sets the "dst_user" edge to the User entity by ID if the given value is not nil.
-func (buo *BillUpdateOne) SetNillableDstUserID(id *int) *BillUpdateOne {
-	if id != nil {
-		buo = buo.SetDstUserID(*id)
-	}
 	return buo
 }
 
@@ -420,7 +402,21 @@ func (buo *BillUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (buo *BillUpdateOne) check() error {
+	if buo.mutation.SrcUserCleared() && len(buo.mutation.SrcUserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Bill.src_user"`)
+	}
+	if buo.mutation.DstUserCleared() && len(buo.mutation.DstUserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Bill.dst_user"`)
+	}
+	return nil
+}
+
 func (buo *BillUpdateOne) sqlSave(ctx context.Context) (_node *Bill, err error) {
+	if err := buo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(bill.Table, bill.Columns, sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt))
 	id, ok := buo.mutation.ID()
 	if !ok {
@@ -483,7 +479,7 @@ func (buo *BillUpdateOne) sqlSave(ctx context.Context) (_node *Bill, err error) 
 	}
 	if buo.mutation.SrcUserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   bill.SrcUserTable,
 			Columns: []string{bill.SrcUserColumn},
@@ -496,7 +492,7 @@ func (buo *BillUpdateOne) sqlSave(ctx context.Context) (_node *Bill, err error) 
 	}
 	if nodes := buo.mutation.SrcUserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   bill.SrcUserTable,
 			Columns: []string{bill.SrcUserColumn},
@@ -512,7 +508,7 @@ func (buo *BillUpdateOne) sqlSave(ctx context.Context) (_node *Bill, err error) 
 	}
 	if buo.mutation.DstUserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   bill.DstUserTable,
 			Columns: []string{bill.DstUserColumn},
@@ -525,7 +521,7 @@ func (buo *BillUpdateOne) sqlSave(ctx context.Context) (_node *Bill, err error) 
 	}
 	if nodes := buo.mutation.DstUserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   bill.DstUserTable,
 			Columns: []string{bill.DstUserColumn},

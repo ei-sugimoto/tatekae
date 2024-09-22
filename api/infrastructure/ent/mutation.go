@@ -1227,24 +1227,26 @@ func (m *ProjectMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	username        *string
-	password        *string
-	email           *string
-	created_at      *time.Time
-	clearedFields   map[string]struct{}
-	projects        map[int]struct{}
-	removedprojects map[int]struct{}
-	clearedprojects bool
-	src_bill        *int
-	clearedsrc_bill bool
-	dst_bill        *int
-	cleareddst_bill bool
-	done            bool
-	oldValue        func(context.Context) (*User, error)
-	predicates      []predicate.User
+	op               Op
+	typ              string
+	id               *int
+	username         *string
+	password         *string
+	email            *string
+	created_at       *time.Time
+	clearedFields    map[string]struct{}
+	projects         map[int]struct{}
+	removedprojects  map[int]struct{}
+	clearedprojects  bool
+	src_bills        map[int]struct{}
+	removedsrc_bills map[int]struct{}
+	clearedsrc_bills bool
+	dst_bills        map[int]struct{}
+	removeddst_bills map[int]struct{}
+	cleareddst_bills bool
+	done             bool
+	oldValue         func(context.Context) (*User, error)
+	predicates       []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -1543,82 +1545,112 @@ func (m *UserMutation) ResetProjects() {
 	m.removedprojects = nil
 }
 
-// SetSrcBillID sets the "src_bill" edge to the Bill entity by id.
-func (m *UserMutation) SetSrcBillID(id int) {
-	m.src_bill = &id
+// AddSrcBillIDs adds the "src_bills" edge to the Bill entity by ids.
+func (m *UserMutation) AddSrcBillIDs(ids ...int) {
+	if m.src_bills == nil {
+		m.src_bills = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.src_bills[ids[i]] = struct{}{}
+	}
 }
 
-// ClearSrcBill clears the "src_bill" edge to the Bill entity.
-func (m *UserMutation) ClearSrcBill() {
-	m.clearedsrc_bill = true
+// ClearSrcBills clears the "src_bills" edge to the Bill entity.
+func (m *UserMutation) ClearSrcBills() {
+	m.clearedsrc_bills = true
 }
 
-// SrcBillCleared reports if the "src_bill" edge to the Bill entity was cleared.
-func (m *UserMutation) SrcBillCleared() bool {
-	return m.clearedsrc_bill
+// SrcBillsCleared reports if the "src_bills" edge to the Bill entity was cleared.
+func (m *UserMutation) SrcBillsCleared() bool {
+	return m.clearedsrc_bills
 }
 
-// SrcBillID returns the "src_bill" edge ID in the mutation.
-func (m *UserMutation) SrcBillID() (id int, exists bool) {
-	if m.src_bill != nil {
-		return *m.src_bill, true
+// RemoveSrcBillIDs removes the "src_bills" edge to the Bill entity by IDs.
+func (m *UserMutation) RemoveSrcBillIDs(ids ...int) {
+	if m.removedsrc_bills == nil {
+		m.removedsrc_bills = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.src_bills, ids[i])
+		m.removedsrc_bills[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSrcBills returns the removed IDs of the "src_bills" edge to the Bill entity.
+func (m *UserMutation) RemovedSrcBillsIDs() (ids []int) {
+	for id := range m.removedsrc_bills {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// SrcBillIDs returns the "src_bill" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// SrcBillID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) SrcBillIDs() (ids []int) {
-	if id := m.src_bill; id != nil {
-		ids = append(ids, *id)
+// SrcBillsIDs returns the "src_bills" edge IDs in the mutation.
+func (m *UserMutation) SrcBillsIDs() (ids []int) {
+	for id := range m.src_bills {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetSrcBill resets all changes to the "src_bill" edge.
-func (m *UserMutation) ResetSrcBill() {
-	m.src_bill = nil
-	m.clearedsrc_bill = false
+// ResetSrcBills resets all changes to the "src_bills" edge.
+func (m *UserMutation) ResetSrcBills() {
+	m.src_bills = nil
+	m.clearedsrc_bills = false
+	m.removedsrc_bills = nil
 }
 
-// SetDstBillID sets the "dst_bill" edge to the Bill entity by id.
-func (m *UserMutation) SetDstBillID(id int) {
-	m.dst_bill = &id
+// AddDstBillIDs adds the "dst_bills" edge to the Bill entity by ids.
+func (m *UserMutation) AddDstBillIDs(ids ...int) {
+	if m.dst_bills == nil {
+		m.dst_bills = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.dst_bills[ids[i]] = struct{}{}
+	}
 }
 
-// ClearDstBill clears the "dst_bill" edge to the Bill entity.
-func (m *UserMutation) ClearDstBill() {
-	m.cleareddst_bill = true
+// ClearDstBills clears the "dst_bills" edge to the Bill entity.
+func (m *UserMutation) ClearDstBills() {
+	m.cleareddst_bills = true
 }
 
-// DstBillCleared reports if the "dst_bill" edge to the Bill entity was cleared.
-func (m *UserMutation) DstBillCleared() bool {
-	return m.cleareddst_bill
+// DstBillsCleared reports if the "dst_bills" edge to the Bill entity was cleared.
+func (m *UserMutation) DstBillsCleared() bool {
+	return m.cleareddst_bills
 }
 
-// DstBillID returns the "dst_bill" edge ID in the mutation.
-func (m *UserMutation) DstBillID() (id int, exists bool) {
-	if m.dst_bill != nil {
-		return *m.dst_bill, true
+// RemoveDstBillIDs removes the "dst_bills" edge to the Bill entity by IDs.
+func (m *UserMutation) RemoveDstBillIDs(ids ...int) {
+	if m.removeddst_bills == nil {
+		m.removeddst_bills = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.dst_bills, ids[i])
+		m.removeddst_bills[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDstBills returns the removed IDs of the "dst_bills" edge to the Bill entity.
+func (m *UserMutation) RemovedDstBillsIDs() (ids []int) {
+	for id := range m.removeddst_bills {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// DstBillIDs returns the "dst_bill" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// DstBillID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) DstBillIDs() (ids []int) {
-	if id := m.dst_bill; id != nil {
-		ids = append(ids, *id)
+// DstBillsIDs returns the "dst_bills" edge IDs in the mutation.
+func (m *UserMutation) DstBillsIDs() (ids []int) {
+	for id := range m.dst_bills {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetDstBill resets all changes to the "dst_bill" edge.
-func (m *UserMutation) ResetDstBill() {
-	m.dst_bill = nil
-	m.cleareddst_bill = false
+// ResetDstBills resets all changes to the "dst_bills" edge.
+func (m *UserMutation) ResetDstBills() {
+	m.dst_bills = nil
+	m.cleareddst_bills = false
+	m.removeddst_bills = nil
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -1809,11 +1841,11 @@ func (m *UserMutation) AddedEdges() []string {
 	if m.projects != nil {
 		edges = append(edges, user.EdgeProjects)
 	}
-	if m.src_bill != nil {
-		edges = append(edges, user.EdgeSrcBill)
+	if m.src_bills != nil {
+		edges = append(edges, user.EdgeSrcBills)
 	}
-	if m.dst_bill != nil {
-		edges = append(edges, user.EdgeDstBill)
+	if m.dst_bills != nil {
+		edges = append(edges, user.EdgeDstBills)
 	}
 	return edges
 }
@@ -1828,14 +1860,18 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeSrcBill:
-		if id := m.src_bill; id != nil {
-			return []ent.Value{*id}
+	case user.EdgeSrcBills:
+		ids := make([]ent.Value, 0, len(m.src_bills))
+		for id := range m.src_bills {
+			ids = append(ids, id)
 		}
-	case user.EdgeDstBill:
-		if id := m.dst_bill; id != nil {
-			return []ent.Value{*id}
+		return ids
+	case user.EdgeDstBills:
+		ids := make([]ent.Value, 0, len(m.dst_bills))
+		for id := range m.dst_bills {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -1845,6 +1881,12 @@ func (m *UserMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 3)
 	if m.removedprojects != nil {
 		edges = append(edges, user.EdgeProjects)
+	}
+	if m.removedsrc_bills != nil {
+		edges = append(edges, user.EdgeSrcBills)
+	}
+	if m.removeddst_bills != nil {
+		edges = append(edges, user.EdgeDstBills)
 	}
 	return edges
 }
@@ -1859,6 +1901,18 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeSrcBills:
+		ids := make([]ent.Value, 0, len(m.removedsrc_bills))
+		for id := range m.removedsrc_bills {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeDstBills:
+		ids := make([]ent.Value, 0, len(m.removeddst_bills))
+		for id := range m.removeddst_bills {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
@@ -1869,11 +1923,11 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedprojects {
 		edges = append(edges, user.EdgeProjects)
 	}
-	if m.clearedsrc_bill {
-		edges = append(edges, user.EdgeSrcBill)
+	if m.clearedsrc_bills {
+		edges = append(edges, user.EdgeSrcBills)
 	}
-	if m.cleareddst_bill {
-		edges = append(edges, user.EdgeDstBill)
+	if m.cleareddst_bills {
+		edges = append(edges, user.EdgeDstBills)
 	}
 	return edges
 }
@@ -1884,10 +1938,10 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
 	case user.EdgeProjects:
 		return m.clearedprojects
-	case user.EdgeSrcBill:
-		return m.clearedsrc_bill
-	case user.EdgeDstBill:
-		return m.cleareddst_bill
+	case user.EdgeSrcBills:
+		return m.clearedsrc_bills
+	case user.EdgeDstBills:
+		return m.cleareddst_bills
 	}
 	return false
 }
@@ -1896,12 +1950,6 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
-	case user.EdgeSrcBill:
-		m.ClearSrcBill()
-		return nil
-	case user.EdgeDstBill:
-		m.ClearDstBill()
-		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
 }
@@ -1913,11 +1961,11 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeProjects:
 		m.ResetProjects()
 		return nil
-	case user.EdgeSrcBill:
-		m.ResetSrcBill()
+	case user.EdgeSrcBills:
+		m.ResetSrcBills()
 		return nil
-	case user.EdgeDstBill:
-		m.ResetDstBill()
+	case user.EdgeDstBills:
+		m.ResetDstBills()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

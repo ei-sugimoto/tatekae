@@ -22,7 +22,7 @@ func (Bill) Fields() []ent.Field {
 func (Bill) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("project", Project.Type).Ref("bills").Unique(),
-		edge.From("src_user", User.Type).Ref("src_bill").Unique(),
-		edge.From("dst_user", User.Type).Ref("dst_bill").Unique(),
+		edge.From("src_user", User.Type).Ref("src_bills").Unique().Required(),
+		edge.From("dst_user", User.Type).Ref("dst_bills").Unique().Required(),
 	}
 }

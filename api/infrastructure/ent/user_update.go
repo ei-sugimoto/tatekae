@@ -86,42 +86,34 @@ func (uu *UserUpdate) AddProjects(p ...*Project) *UserUpdate {
 	return uu.AddProjectIDs(ids...)
 }
 
-// SetSrcBillID sets the "src_bill" edge to the Bill entity by ID.
-func (uu *UserUpdate) SetSrcBillID(id int) *UserUpdate {
-	uu.mutation.SetSrcBillID(id)
+// AddSrcBillIDs adds the "src_bills" edge to the Bill entity by IDs.
+func (uu *UserUpdate) AddSrcBillIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddSrcBillIDs(ids...)
 	return uu
 }
 
-// SetNillableSrcBillID sets the "src_bill" edge to the Bill entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableSrcBillID(id *int) *UserUpdate {
-	if id != nil {
-		uu = uu.SetSrcBillID(*id)
+// AddSrcBills adds the "src_bills" edges to the Bill entity.
+func (uu *UserUpdate) AddSrcBills(b ...*Bill) *UserUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
 	}
+	return uu.AddSrcBillIDs(ids...)
+}
+
+// AddDstBillIDs adds the "dst_bills" edge to the Bill entity by IDs.
+func (uu *UserUpdate) AddDstBillIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddDstBillIDs(ids...)
 	return uu
 }
 
-// SetSrcBill sets the "src_bill" edge to the Bill entity.
-func (uu *UserUpdate) SetSrcBill(b *Bill) *UserUpdate {
-	return uu.SetSrcBillID(b.ID)
-}
-
-// SetDstBillID sets the "dst_bill" edge to the Bill entity by ID.
-func (uu *UserUpdate) SetDstBillID(id int) *UserUpdate {
-	uu.mutation.SetDstBillID(id)
-	return uu
-}
-
-// SetNillableDstBillID sets the "dst_bill" edge to the Bill entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableDstBillID(id *int) *UserUpdate {
-	if id != nil {
-		uu = uu.SetDstBillID(*id)
+// AddDstBills adds the "dst_bills" edges to the Bill entity.
+func (uu *UserUpdate) AddDstBills(b ...*Bill) *UserUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
 	}
-	return uu
-}
-
-// SetDstBill sets the "dst_bill" edge to the Bill entity.
-func (uu *UserUpdate) SetDstBill(b *Bill) *UserUpdate {
-	return uu.SetDstBillID(b.ID)
+	return uu.AddDstBillIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -150,16 +142,46 @@ func (uu *UserUpdate) RemoveProjects(p ...*Project) *UserUpdate {
 	return uu.RemoveProjectIDs(ids...)
 }
 
-// ClearSrcBill clears the "src_bill" edge to the Bill entity.
-func (uu *UserUpdate) ClearSrcBill() *UserUpdate {
-	uu.mutation.ClearSrcBill()
+// ClearSrcBills clears all "src_bills" edges to the Bill entity.
+func (uu *UserUpdate) ClearSrcBills() *UserUpdate {
+	uu.mutation.ClearSrcBills()
 	return uu
 }
 
-// ClearDstBill clears the "dst_bill" edge to the Bill entity.
-func (uu *UserUpdate) ClearDstBill() *UserUpdate {
-	uu.mutation.ClearDstBill()
+// RemoveSrcBillIDs removes the "src_bills" edge to Bill entities by IDs.
+func (uu *UserUpdate) RemoveSrcBillIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveSrcBillIDs(ids...)
 	return uu
+}
+
+// RemoveSrcBills removes "src_bills" edges to Bill entities.
+func (uu *UserUpdate) RemoveSrcBills(b ...*Bill) *UserUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uu.RemoveSrcBillIDs(ids...)
+}
+
+// ClearDstBills clears all "dst_bills" edges to the Bill entity.
+func (uu *UserUpdate) ClearDstBills() *UserUpdate {
+	uu.mutation.ClearDstBills()
+	return uu
+}
+
+// RemoveDstBillIDs removes the "dst_bills" edge to Bill entities by IDs.
+func (uu *UserUpdate) RemoveDstBillIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveDstBillIDs(ids...)
+	return uu
+}
+
+// RemoveDstBills removes "dst_bills" edges to Bill entities.
+func (uu *UserUpdate) RemoveDstBills(b ...*Bill) *UserUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uu.RemoveDstBillIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -252,12 +274,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.SrcBillCleared() {
+	if uu.mutation.SrcBillsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SrcBillTable,
-			Columns: []string{user.SrcBillColumn},
+			Table:   user.SrcBillsTable,
+			Columns: []string{user.SrcBillsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
@@ -265,12 +287,28 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.SrcBillIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.RemovedSrcBillsIDs(); len(nodes) > 0 && !uu.mutation.SrcBillsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SrcBillTable,
-			Columns: []string{user.SrcBillColumn},
+			Table:   user.SrcBillsTable,
+			Columns: []string{user.SrcBillsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.SrcBillsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SrcBillsTable,
+			Columns: []string{user.SrcBillsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
@@ -281,12 +319,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.DstBillCleared() {
+	if uu.mutation.DstBillsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.DstBillTable,
-			Columns: []string{user.DstBillColumn},
+			Table:   user.DstBillsTable,
+			Columns: []string{user.DstBillsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
@@ -294,12 +332,28 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.DstBillIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.RemovedDstBillsIDs(); len(nodes) > 0 && !uu.mutation.DstBillsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.DstBillTable,
-			Columns: []string{user.DstBillColumn},
+			Table:   user.DstBillsTable,
+			Columns: []string{user.DstBillsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.DstBillsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DstBillsTable,
+			Columns: []string{user.DstBillsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
@@ -387,42 +441,34 @@ func (uuo *UserUpdateOne) AddProjects(p ...*Project) *UserUpdateOne {
 	return uuo.AddProjectIDs(ids...)
 }
 
-// SetSrcBillID sets the "src_bill" edge to the Bill entity by ID.
-func (uuo *UserUpdateOne) SetSrcBillID(id int) *UserUpdateOne {
-	uuo.mutation.SetSrcBillID(id)
+// AddSrcBillIDs adds the "src_bills" edge to the Bill entity by IDs.
+func (uuo *UserUpdateOne) AddSrcBillIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddSrcBillIDs(ids...)
 	return uuo
 }
 
-// SetNillableSrcBillID sets the "src_bill" edge to the Bill entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableSrcBillID(id *int) *UserUpdateOne {
-	if id != nil {
-		uuo = uuo.SetSrcBillID(*id)
+// AddSrcBills adds the "src_bills" edges to the Bill entity.
+func (uuo *UserUpdateOne) AddSrcBills(b ...*Bill) *UserUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
 	}
+	return uuo.AddSrcBillIDs(ids...)
+}
+
+// AddDstBillIDs adds the "dst_bills" edge to the Bill entity by IDs.
+func (uuo *UserUpdateOne) AddDstBillIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddDstBillIDs(ids...)
 	return uuo
 }
 
-// SetSrcBill sets the "src_bill" edge to the Bill entity.
-func (uuo *UserUpdateOne) SetSrcBill(b *Bill) *UserUpdateOne {
-	return uuo.SetSrcBillID(b.ID)
-}
-
-// SetDstBillID sets the "dst_bill" edge to the Bill entity by ID.
-func (uuo *UserUpdateOne) SetDstBillID(id int) *UserUpdateOne {
-	uuo.mutation.SetDstBillID(id)
-	return uuo
-}
-
-// SetNillableDstBillID sets the "dst_bill" edge to the Bill entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableDstBillID(id *int) *UserUpdateOne {
-	if id != nil {
-		uuo = uuo.SetDstBillID(*id)
+// AddDstBills adds the "dst_bills" edges to the Bill entity.
+func (uuo *UserUpdateOne) AddDstBills(b ...*Bill) *UserUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
 	}
-	return uuo
-}
-
-// SetDstBill sets the "dst_bill" edge to the Bill entity.
-func (uuo *UserUpdateOne) SetDstBill(b *Bill) *UserUpdateOne {
-	return uuo.SetDstBillID(b.ID)
+	return uuo.AddDstBillIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -451,16 +497,46 @@ func (uuo *UserUpdateOne) RemoveProjects(p ...*Project) *UserUpdateOne {
 	return uuo.RemoveProjectIDs(ids...)
 }
 
-// ClearSrcBill clears the "src_bill" edge to the Bill entity.
-func (uuo *UserUpdateOne) ClearSrcBill() *UserUpdateOne {
-	uuo.mutation.ClearSrcBill()
+// ClearSrcBills clears all "src_bills" edges to the Bill entity.
+func (uuo *UserUpdateOne) ClearSrcBills() *UserUpdateOne {
+	uuo.mutation.ClearSrcBills()
 	return uuo
 }
 
-// ClearDstBill clears the "dst_bill" edge to the Bill entity.
-func (uuo *UserUpdateOne) ClearDstBill() *UserUpdateOne {
-	uuo.mutation.ClearDstBill()
+// RemoveSrcBillIDs removes the "src_bills" edge to Bill entities by IDs.
+func (uuo *UserUpdateOne) RemoveSrcBillIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveSrcBillIDs(ids...)
 	return uuo
+}
+
+// RemoveSrcBills removes "src_bills" edges to Bill entities.
+func (uuo *UserUpdateOne) RemoveSrcBills(b ...*Bill) *UserUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uuo.RemoveSrcBillIDs(ids...)
+}
+
+// ClearDstBills clears all "dst_bills" edges to the Bill entity.
+func (uuo *UserUpdateOne) ClearDstBills() *UserUpdateOne {
+	uuo.mutation.ClearDstBills()
+	return uuo
+}
+
+// RemoveDstBillIDs removes the "dst_bills" edge to Bill entities by IDs.
+func (uuo *UserUpdateOne) RemoveDstBillIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveDstBillIDs(ids...)
+	return uuo
+}
+
+// RemoveDstBills removes "dst_bills" edges to Bill entities.
+func (uuo *UserUpdateOne) RemoveDstBills(b ...*Bill) *UserUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uuo.RemoveDstBillIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -583,12 +659,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.SrcBillCleared() {
+	if uuo.mutation.SrcBillsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SrcBillTable,
-			Columns: []string{user.SrcBillColumn},
+			Table:   user.SrcBillsTable,
+			Columns: []string{user.SrcBillsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
@@ -596,12 +672,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.SrcBillIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.RemovedSrcBillsIDs(); len(nodes) > 0 && !uuo.mutation.SrcBillsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SrcBillTable,
-			Columns: []string{user.SrcBillColumn},
+			Table:   user.SrcBillsTable,
+			Columns: []string{user.SrcBillsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.SrcBillsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SrcBillsTable,
+			Columns: []string{user.SrcBillsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
@@ -612,12 +704,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.DstBillCleared() {
+	if uuo.mutation.DstBillsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.DstBillTable,
-			Columns: []string{user.DstBillColumn},
+			Table:   user.DstBillsTable,
+			Columns: []string{user.DstBillsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
@@ -625,12 +717,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.DstBillIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.RemovedDstBillsIDs(); len(nodes) > 0 && !uuo.mutation.DstBillsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.DstBillTable,
-			Columns: []string{user.DstBillColumn},
+			Table:   user.DstBillsTable,
+			Columns: []string{user.DstBillsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.DstBillsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DstBillsTable,
+			Columns: []string{user.DstBillsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(bill.FieldID, field.TypeInt),

@@ -22,10 +22,10 @@ const (
 	FieldCreatedAt = "created_at"
 	// EdgeProjects holds the string denoting the projects edge name in mutations.
 	EdgeProjects = "projects"
-	// EdgeSrcBill holds the string denoting the src_bill edge name in mutations.
-	EdgeSrcBill = "src_bill"
-	// EdgeDstBill holds the string denoting the dst_bill edge name in mutations.
-	EdgeDstBill = "dst_bill"
+	// EdgeSrcBills holds the string denoting the src_bills edge name in mutations.
+	EdgeSrcBills = "src_bills"
+	// EdgeDstBills holds the string denoting the dst_bills edge name in mutations.
+	EdgeDstBills = "dst_bills"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ProjectsTable is the table that holds the projects relation/edge. The primary key declared below.
@@ -33,20 +33,20 @@ const (
 	// ProjectsInverseTable is the table name for the Project entity.
 	// It exists in this package in order to avoid circular dependency with the "project" package.
 	ProjectsInverseTable = "projects"
-	// SrcBillTable is the table that holds the src_bill relation/edge.
-	SrcBillTable = "bills"
-	// SrcBillInverseTable is the table name for the Bill entity.
+	// SrcBillsTable is the table that holds the src_bills relation/edge.
+	SrcBillsTable = "bills"
+	// SrcBillsInverseTable is the table name for the Bill entity.
 	// It exists in this package in order to avoid circular dependency with the "bill" package.
-	SrcBillInverseTable = "bills"
-	// SrcBillColumn is the table column denoting the src_bill relation/edge.
-	SrcBillColumn = "user_src_bill"
-	// DstBillTable is the table that holds the dst_bill relation/edge.
-	DstBillTable = "bills"
-	// DstBillInverseTable is the table name for the Bill entity.
+	SrcBillsInverseTable = "bills"
+	// SrcBillsColumn is the table column denoting the src_bills relation/edge.
+	SrcBillsColumn = "user_src_bills"
+	// DstBillsTable is the table that holds the dst_bills relation/edge.
+	DstBillsTable = "bills"
+	// DstBillsInverseTable is the table name for the Bill entity.
 	// It exists in this package in order to avoid circular dependency with the "bill" package.
-	DstBillInverseTable = "bills"
-	// DstBillColumn is the table column denoting the dst_bill relation/edge.
-	DstBillColumn = "user_dst_bill"
+	DstBillsInverseTable = "bills"
+	// DstBillsColumn is the table column denoting the dst_bills relation/edge.
+	DstBillsColumn = "user_dst_bills"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -116,17 +116,31 @@ func ByProjects(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// BySrcBillField orders the results by src_bill field.
-func BySrcBillField(field string, opts ...sql.OrderTermOption) OrderOption {
+// BySrcBillsCount orders the results by src_bills count.
+func BySrcBillsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSrcBillStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newSrcBillsStep(), opts...)
 	}
 }
 
-// ByDstBillField orders the results by dst_bill field.
-func ByDstBillField(field string, opts ...sql.OrderTermOption) OrderOption {
+// BySrcBills orders the results by src_bills terms.
+func BySrcBills(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newDstBillStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newSrcBillsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByDstBillsCount orders the results by dst_bills count.
+func ByDstBillsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDstBillsStep(), opts...)
+	}
+}
+
+// ByDstBills orders the results by dst_bills terms.
+func ByDstBills(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDstBillsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newProjectsStep() *sqlgraph.Step {
@@ -136,17 +150,17 @@ func newProjectsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2M, true, ProjectsTable, ProjectsPrimaryKey...),
 	)
 }
-func newSrcBillStep() *sqlgraph.Step {
+func newSrcBillsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SrcBillInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, SrcBillTable, SrcBillColumn),
+		sqlgraph.To(SrcBillsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SrcBillsTable, SrcBillsColumn),
 	)
 }
-func newDstBillStep() *sqlgraph.Step {
+func newDstBillsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(DstBillInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, DstBillTable, DstBillColumn),
+		sqlgraph.To(DstBillsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DstBillsTable, DstBillsColumn),
 	)
 }

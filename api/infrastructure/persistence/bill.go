@@ -7,6 +7,7 @@ import (
 
 	"github.com/ei-sugimoto/tatekae/api/infrastructure"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/bill"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/predicate"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/project"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/user"
@@ -51,6 +52,7 @@ func (p *PersistBill) Create(new *model.Bill) (*model.Bill, error) {
 	}
 
 	res, err := p.db.Bill.Create().SetDstUser(dstUserID).SetSrcUser(srcUserID).SetPrice(new.Price).SetProject(ProjectID).Save(ctx)
+	res, err = p.db.Bill.Query().WithProject().WithSrcUser().WithDstUser().Where(bill.ID(res.ID)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}

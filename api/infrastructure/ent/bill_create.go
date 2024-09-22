@@ -52,14 +52,6 @@ func (bc *BillCreate) SetSrcUserID(id int) *BillCreate {
 	return bc
 }
 
-// SetNillableSrcUserID sets the "src_user" edge to the User entity by ID if the given value is not nil.
-func (bc *BillCreate) SetNillableSrcUserID(id *int) *BillCreate {
-	if id != nil {
-		bc = bc.SetSrcUserID(*id)
-	}
-	return bc
-}
-
 // SetSrcUser sets the "src_user" edge to the User entity.
 func (bc *BillCreate) SetSrcUser(u *User) *BillCreate {
 	return bc.SetSrcUserID(u.ID)
@@ -68,14 +60,6 @@ func (bc *BillCreate) SetSrcUser(u *User) *BillCreate {
 // SetDstUserID sets the "dst_user" edge to the User entity by ID.
 func (bc *BillCreate) SetDstUserID(id int) *BillCreate {
 	bc.mutation.SetDstUserID(id)
-	return bc
-}
-
-// SetNillableDstUserID sets the "dst_user" edge to the User entity by ID if the given value is not nil.
-func (bc *BillCreate) SetNillableDstUserID(id *int) *BillCreate {
-	if id != nil {
-		bc = bc.SetDstUserID(*id)
-	}
 	return bc
 }
 
@@ -120,6 +104,12 @@ func (bc *BillCreate) ExecX(ctx context.Context) {
 func (bc *BillCreate) check() error {
 	if _, ok := bc.mutation.Price(); !ok {
 		return &ValidationError{Name: "price", err: errors.New(`ent: missing required field "Bill.price"`)}
+	}
+	if len(bc.mutation.SrcUserIDs()) == 0 {
+		return &ValidationError{Name: "src_user", err: errors.New(`ent: missing required edge "Bill.src_user"`)}
+	}
+	if len(bc.mutation.DstUserIDs()) == 0 {
+		return &ValidationError{Name: "dst_user", err: errors.New(`ent: missing required edge "Bill.dst_user"`)}
 	}
 	return nil
 }
@@ -170,7 +160,7 @@ func (bc *BillCreate) createSpec() (*Bill, *sqlgraph.CreateSpec) {
 	}
 	if nodes := bc.mutation.SrcUserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   bill.SrcUserTable,
 			Columns: []string{bill.SrcUserColumn},
@@ -182,12 +172,12 @@ func (bc *BillCreate) createSpec() (*Bill, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_src_bill = &nodes[0]
+		_node.user_src_bills = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := bc.mutation.DstUserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   bill.DstUserTable,
 			Columns: []string{bill.DstUserColumn},
@@ -199,7 +189,7 @@ func (bc *BillCreate) createSpec() (*Bill, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_dst_bill = &nodes[0]
+		_node.user_dst_bills = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

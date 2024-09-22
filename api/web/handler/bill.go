@@ -42,3 +42,25 @@ func (h *BillHandler) Create(c context.Context, req *proto.CreateBillRequest) (*
 		DstUserId: int32(res.DstUser),
 	}, nil
 }
+
+func (h *BillHandler) ListByProject(c context.Context, req *proto.ListByProjectRequest) (*proto.ListByProjectResponse, error) {
+	res, err := h.u.ListByProject(int(req.ProjectId))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list project: %v", err)
+	}
+
+	bills := make([]*proto.Bill, 0, len(res))
+	for _, v := range res {
+		bills = append(bills, &proto.Bill{
+			ID:        int32(v.ID),
+			Price:     int32(v.Price),
+			ProjectId: int32(v.ProjectID),
+			SrcUserId: int32(v.SrcUser),
+			DstUserId: int32(v.DstUser),
+		})
+	}
+
+	return &proto.ListByProjectResponse{
+		Bills: bills,
+	}, nil
+}
