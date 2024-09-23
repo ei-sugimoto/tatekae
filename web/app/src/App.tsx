@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import './App.css';
 import LoginForm from './components/loginFrom';
 import RegisterForm from './components/registerForm';
@@ -10,14 +9,7 @@ import {
   TabPanel,
   Flex,
 } from '@chakra-ui/react';
-import { CheckExistToken } from './utils/checkToken';
 function App() {
-  const navigate = useNavigate();
-
-  if (CheckExistToken()) {
-    console.log('Token exists');
-    navigate('/dashboard');
-  }
   return (
     <>
       <Flex justify={'center'} align={'center'}>

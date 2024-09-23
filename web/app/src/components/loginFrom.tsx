@@ -15,6 +15,8 @@ import {
   WrapItem,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
+import { useAtom } from 'jotai';
+import { MeAtom } from '../utils/meAtom';
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -22,6 +24,8 @@ const LoginForm: React.FC = () => {
   const [error, setError] = useState('');
   const toast = useToast();
   const navigate = useNavigate();
+
+  const [me, setMe] = useAtom(MeAtom);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -32,9 +36,11 @@ const LoginForm: React.FC = () => {
       setError(res.message);
       return;
     }
-
-    navigate('/dashboard');
     localStorage.setItem('token', res.token);
+    setMe((prev) => ({ ...prev, id: res.id, name: res.username }));
+    console.log(me);
+    console.log(res);
+    navigate('/dashboard');
 
     return;
   };

@@ -44,7 +44,9 @@ func (h *UserHandler) Register(ctx context.Context, arg *connect.Request[userv1.
 
 	return &connect.Response[userv1.RegisterResponse]{
 		Msg: &userv1.RegisterResponse{
-			Token: token,
+			Token:    token,
+			Id:       int32(res.ID),
+			Username: res.Username,
 		},
 	}, nil
 }
@@ -62,7 +64,9 @@ func (h *UserHandler) Login(ctx context.Context, arg *connect.Request[userv1.Log
 
 	return &connect.Response[userv1.LoginResponse]{
 		Msg: &userv1.LoginResponse{
-			Token: token,
+			Token:    token,
+			Id:       int32(user.ID),
+			Username: user.Username,
 		},
 	}, nil
 }

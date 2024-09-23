@@ -64,6 +64,16 @@ export class RegisterResponse extends Message<RegisterResponse> {
    */
   token = "";
 
+  /**
+   * @generated from field: int32 id = 2;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: string username = 3;
+   */
+  username = "";
+
   constructor(data?: PartialMessage<RegisterResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -73,6 +83,8 @@ export class RegisterResponse extends Message<RegisterResponse> {
   static readonly typeName = "proto_user.v1.RegisterResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "id", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 3, name: "username", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RegisterResponse {
@@ -144,6 +156,16 @@ export class LoginResponse extends Message<LoginResponse> {
    */
   token = "";
 
+  /**
+   * @generated from field: int32 id = 2;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: string username = 3;
+   */
+  username = "";
+
   constructor(data?: PartialMessage<LoginResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -153,6 +175,8 @@ export class LoginResponse extends Message<LoginResponse> {
   static readonly typeName = "proto_user.v1.LoginResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "id", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 3, name: "username", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LoginResponse {

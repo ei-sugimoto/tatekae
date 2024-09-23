@@ -48,6 +48,7 @@ export function DashBoard() {
               w={'max-content'}
               justifyContent={'center'}
               alignContent={'center'}
+              key={project.id}
             >
               <>
                 <Link to={`/project/${project.id}`}>

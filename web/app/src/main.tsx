@@ -7,6 +7,8 @@ import { DashBoard } from './pages/dashBeard';
 import ProtectedRoute from './components/protectedRoute';
 import { ProjectDetail } from './pages/projectDetail';
 import UnProtectedRoute from './components/unProtectedRoute';
+import { Provider } from 'jotai';
+import { store } from './utils/meAtom';
 
 const rootElement = document.getElementById('root');
 
@@ -29,7 +31,9 @@ if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
       <ChakraProvider>
-        <RouterProvider router={router} />
+        <Provider store={store}>
+          <RouterProvider router={router} />
+        </Provider>
       </ChakraProvider>
     </React.StrictMode>
   );

@@ -13,6 +13,8 @@ import {
   ProjectServiceJoinListResponse,
 } from '../gen/proto_project/v1/project_pb';
 import { ProjectService } from '../gen/proto_project/v1/project_connect';
+import { useAtomValue } from 'jotai';
+import { MeAtom } from '../utils/meAtom';
 
 export function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +32,8 @@ export function ProjectDetail() {
 
   const [memberList, setMemberList] =
     useState<ProjectServiceJoinListResponse | null>(null);
+
+  const me = useAtomValue(MeAtom);
 
   useEffect(() => {
     if (!id) {
@@ -129,6 +133,7 @@ export function ProjectDetail() {
 
       <Text fontSize={'2xl'}>new Bill</Text>
       <form></form>
+      <Text>{me?.name}</Text>
     </>
   );
 }

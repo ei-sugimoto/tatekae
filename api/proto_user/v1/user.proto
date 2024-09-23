@@ -18,6 +18,8 @@ message RegisterRequest {
 
 message RegisterResponse {
   string token = 1;
+  int32 id = 2;
+  string username = 3;
 }
 
 message LoginRequest {
@@ -27,6 +29,8 @@ message LoginRequest {
 
 message LoginResponse {
   string token = 1;
+  int32 id = 2;
+  string username = 3;
 }
 
 message GetByIDRequest {
