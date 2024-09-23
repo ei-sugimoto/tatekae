@@ -1,6 +1,16 @@
-.PHONY: protoc
-protoc:
-	protoc --go_out=./api/web --go-grpc_out=./api/web proto/*.proto
+.PHONY: apibuf
+apibuf:
+	cd api && buf lint && buf format -w && buf generate
+
+.PHONY: webbuf
+webbuf:
+	docker compose exec web bash -c "npx buf generate"
+
+
+.PHONY: buf
+buf:
+	make apibuf
+	make webbuf
 
 .PHONY: entgen
 entgen:

@@ -37,6 +37,8 @@ const (
 	UserServiceRegisterProcedure = "/proto_user.v1.UserService/Register"
 	// UserServiceLoginProcedure is the fully-qualified name of the UserService's Login RPC.
 	UserServiceLoginProcedure = "/proto_user.v1.UserService/Login"
+	// UserServiceGetByIDProcedure is the fully-qualified name of the UserService's GetByID RPC.
+	UserServiceGetByIDProcedure = "/proto_user.v1.UserService/GetByID"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -44,12 +46,14 @@ var (
 	userServiceServiceDescriptor        = v1.File_proto_user_v1_user_proto.Services().ByName("UserService")
 	userServiceRegisterMethodDescriptor = userServiceServiceDescriptor.Methods().ByName("Register")
 	userServiceLoginMethodDescriptor    = userServiceServiceDescriptor.Methods().ByName("Login")
+	userServiceGetByIDMethodDescriptor  = userServiceServiceDescriptor.Methods().ByName("GetByID")
 )
 
 // UserServiceClient is a client for the proto_user.v1.UserService service.
 type UserServiceClient interface {
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error)
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
+	GetByID(context.Context, *connect.Request[v1.GetByIDRequest]) (*connect.Response[v1.GetByIDResponse], error)
 }
 
 // NewUserServiceClient constructs a client for the proto_user.v1.UserService service. By default,
@@ -74,6 +78,12 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(userServiceLoginMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		getByID: connect.NewClient[v1.GetByIDRequest, v1.GetByIDResponse](
+			httpClient,
+			baseURL+UserServiceGetByIDProcedure,
+			connect.WithSchema(userServiceGetByIDMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -81,6 +91,7 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 type userServiceClient struct {
 	register *connect.Client[v1.RegisterRequest, v1.RegisterResponse]
 	login    *connect.Client[v1.LoginRequest, v1.LoginResponse]
+	getByID  *connect.Client[v1.GetByIDRequest, v1.GetByIDResponse]
 }
 
 // Register calls proto_user.v1.UserService.Register.
@@ -93,10 +104,16 @@ func (c *userServiceClient) Login(ctx context.Context, req *connect.Request[v1.L
 	return c.login.CallUnary(ctx, req)
 }
 
+// GetByID calls proto_user.v1.UserService.GetByID.
+func (c *userServiceClient) GetByID(ctx context.Context, req *connect.Request[v1.GetByIDRequest]) (*connect.Response[v1.GetByIDResponse], error) {
+	return c.getByID.CallUnary(ctx, req)
+}
+
 // UserServiceHandler is an implementation of the proto_user.v1.UserService service.
 type UserServiceHandler interface {
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error)
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
+	GetByID(context.Context, *connect.Request[v1.GetByIDRequest]) (*connect.Response[v1.GetByIDResponse], error)
 }
 
 // NewUserServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -117,12 +134,20 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(userServiceLoginMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	userServiceGetByIDHandler := connect.NewUnaryHandler(
+		UserServiceGetByIDProcedure,
+		svc.GetByID,
+		connect.WithSchema(userServiceGetByIDMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/proto_user.v1.UserService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case UserServiceRegisterProcedure:
 			userServiceRegisterHandler.ServeHTTP(w, r)
 		case UserServiceLoginProcedure:
 			userServiceLoginHandler.ServeHTTP(w, r)
+		case UserServiceGetByIDProcedure:
+			userServiceGetByIDHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -138,4 +163,8 @@ func (UnimplementedUserServiceHandler) Register(context.Context, *connect.Reques
 
 func (UnimplementedUserServiceHandler) Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto_user.v1.UserService.Login is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) GetByID(context.Context, *connect.Request[v1.GetByIDRequest]) (*connect.Response[v1.GetByIDResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto_user.v1.UserService.GetByID is not implemented"))
 }

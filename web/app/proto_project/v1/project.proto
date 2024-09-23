@@ -9,9 +9,15 @@ service ProjectService {
   rpc List(ProjectServiceListRequest) returns (ProjectServiceListResponse);
   rpc Join(ProjectServiceJoinRequest) returns (ProjectServiceJoinResponse);
   rpc Get(ProjectServiceGetRequest) returns (ProjectServiceGetResponse);
+  rpc JoinList(ProjectServiceJoinListRequest) returns (ProjectServiceJoinListResponse);
 }
 
 message Project {
+  int32 id = 1;
+  string name = 2;
+}
+
+message JoinMember {
   int32 id = 1;
   string name = 2;
 }
@@ -47,4 +53,12 @@ message ProjectServiceGetRequest {
 message ProjectServiceGetResponse {
   int32 id = 1;
   string name = 2;
+}
+
+message ProjectServiceJoinListRequest {
+  int32 id = 1;
+}
+
+message ProjectServiceJoinListResponse {
+  repeated JoinMember members = 1;
 }

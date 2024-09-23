@@ -50,6 +50,49 @@ export class Project extends Message<Project> {
 }
 
 /**
+ * @generated from message proto_project.v1.JoinMember
+ */
+export class JoinMember extends Message<JoinMember> {
+  /**
+   * @generated from field: int32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
+  constructor(data?: PartialMessage<JoinMember>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "proto_project.v1.JoinMember";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): JoinMember {
+    return new JoinMember().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): JoinMember {
+    return new JoinMember().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): JoinMember {
+    return new JoinMember().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: JoinMember | PlainMessage<JoinMember> | undefined, b: JoinMember | PlainMessage<JoinMember> | undefined): boolean {
+    return proto3.util.equals(JoinMember, a, b);
+  }
+}
+
+/**
  * @generated from message proto_project.v1.ProjectServiceCreateRequest
  */
 export class ProjectServiceCreateRequest extends Message<ProjectServiceCreateRequest> {
@@ -354,6 +397,80 @@ export class ProjectServiceGetResponse extends Message<ProjectServiceGetResponse
 
   static equals(a: ProjectServiceGetResponse | PlainMessage<ProjectServiceGetResponse> | undefined, b: ProjectServiceGetResponse | PlainMessage<ProjectServiceGetResponse> | undefined): boolean {
     return proto3.util.equals(ProjectServiceGetResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message proto_project.v1.ProjectServiceJoinListRequest
+ */
+export class ProjectServiceJoinListRequest extends Message<ProjectServiceJoinListRequest> {
+  /**
+   * @generated from field: int32 id = 1;
+   */
+  id = 0;
+
+  constructor(data?: PartialMessage<ProjectServiceJoinListRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "proto_project.v1.ProjectServiceJoinListRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ProjectServiceJoinListRequest {
+    return new ProjectServiceJoinListRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ProjectServiceJoinListRequest {
+    return new ProjectServiceJoinListRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ProjectServiceJoinListRequest {
+    return new ProjectServiceJoinListRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ProjectServiceJoinListRequest | PlainMessage<ProjectServiceJoinListRequest> | undefined, b: ProjectServiceJoinListRequest | PlainMessage<ProjectServiceJoinListRequest> | undefined): boolean {
+    return proto3.util.equals(ProjectServiceJoinListRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message proto_project.v1.ProjectServiceJoinListResponse
+ */
+export class ProjectServiceJoinListResponse extends Message<ProjectServiceJoinListResponse> {
+  /**
+   * @generated from field: repeated proto_project.v1.JoinMember members = 1;
+   */
+  members: JoinMember[] = [];
+
+  constructor(data?: PartialMessage<ProjectServiceJoinListResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "proto_project.v1.ProjectServiceJoinListResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "members", kind: "message", T: JoinMember, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ProjectServiceJoinListResponse {
+    return new ProjectServiceJoinListResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ProjectServiceJoinListResponse {
+    return new ProjectServiceJoinListResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ProjectServiceJoinListResponse {
+    return new ProjectServiceJoinListResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ProjectServiceJoinListResponse | PlainMessage<ProjectServiceJoinListResponse> | undefined, b: ProjectServiceJoinListResponse | PlainMessage<ProjectServiceJoinListResponse> | undefined): boolean {
+    return proto3.util.equals(ProjectServiceJoinListResponse, a, b);
   }
 }
 

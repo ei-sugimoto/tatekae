@@ -7,4 +7,5 @@ type ProjectRepo interface {
 	List() ([]*model.Project, error)
 	Join(int, int) error
 	Get(int) (*model.Project, error)
+	JoinList(int) ([]*model.User, error)
 }

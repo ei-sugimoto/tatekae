@@ -53,7 +53,7 @@ var (
 // BillServiceClient is a client for the proto_bill.v1.BillService service.
 type BillServiceClient interface {
 	Create(context.Context, *connect.Request[v1.BillServiceCreateRequest]) (*connect.Response[v1.BillServiceCreateResponse], error)
-	SumarizeByProject(context.Context, *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error)
+	SumarizeByProject(context.Context, *connect.Request[v1.BillServiceSumarizeByProjectRequest]) (*connect.Response[v1.BillServiceSumarizeByProjectResponse], error)
 	List(context.Context, *connect.Request[v1.BillServiceListRequest]) (*connect.Response[v1.BillServiceListResponse], error)
 }
 
@@ -73,7 +73,7 @@ func NewBillServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(billServiceCreateMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		sumarizeByProject: connect.NewClient[v1.BillServiceSumrizeByProjectRequest, v1.BillServiceSumrizeByProjectResponse](
+		sumarizeByProject: connect.NewClient[v1.BillServiceSumarizeByProjectRequest, v1.BillServiceSumarizeByProjectResponse](
 			httpClient,
 			baseURL+BillServiceSumarizeByProjectProcedure,
 			connect.WithSchema(billServiceSumarizeByProjectMethodDescriptor),
@@ -91,7 +91,7 @@ func NewBillServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 // billServiceClient implements BillServiceClient.
 type billServiceClient struct {
 	create            *connect.Client[v1.BillServiceCreateRequest, v1.BillServiceCreateResponse]
-	sumarizeByProject *connect.Client[v1.BillServiceSumrizeByProjectRequest, v1.BillServiceSumrizeByProjectResponse]
+	sumarizeByProject *connect.Client[v1.BillServiceSumarizeByProjectRequest, v1.BillServiceSumarizeByProjectResponse]
 	list              *connect.Client[v1.BillServiceListRequest, v1.BillServiceListResponse]
 }
 
@@ -101,7 +101,7 @@ func (c *billServiceClient) Create(ctx context.Context, req *connect.Request[v1.
 }
 
 // SumarizeByProject calls proto_bill.v1.BillService.SumarizeByProject.
-func (c *billServiceClient) SumarizeByProject(ctx context.Context, req *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error) {
+func (c *billServiceClient) SumarizeByProject(ctx context.Context, req *connect.Request[v1.BillServiceSumarizeByProjectRequest]) (*connect.Response[v1.BillServiceSumarizeByProjectResponse], error) {
 	return c.sumarizeByProject.CallUnary(ctx, req)
 }
 
@@ -113,7 +113,7 @@ func (c *billServiceClient) List(ctx context.Context, req *connect.Request[v1.Bi
 // BillServiceHandler is an implementation of the proto_bill.v1.BillService service.
 type BillServiceHandler interface {
 	Create(context.Context, *connect.Request[v1.BillServiceCreateRequest]) (*connect.Response[v1.BillServiceCreateResponse], error)
-	SumarizeByProject(context.Context, *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error)
+	SumarizeByProject(context.Context, *connect.Request[v1.BillServiceSumarizeByProjectRequest]) (*connect.Response[v1.BillServiceSumarizeByProjectResponse], error)
 	List(context.Context, *connect.Request[v1.BillServiceListRequest]) (*connect.Response[v1.BillServiceListResponse], error)
 }
 
@@ -162,7 +162,7 @@ func (UnimplementedBillServiceHandler) Create(context.Context, *connect.Request[
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto_bill.v1.BillService.Create is not implemented"))
 }
 
-func (UnimplementedBillServiceHandler) SumarizeByProject(context.Context, *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error) {
+func (UnimplementedBillServiceHandler) SumarizeByProject(context.Context, *connect.Request[v1.BillServiceSumarizeByProjectRequest]) (*connect.Response[v1.BillServiceSumarizeByProjectResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto_bill.v1.BillService.SumarizeByProject is not implemented"))
 }
 

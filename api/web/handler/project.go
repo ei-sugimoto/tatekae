@@ -98,3 +98,26 @@ func (h *ProjectHandler) Get(ctx context.Context, arg *connect.Request[projectv1
 		},
 	}, nil
 }
+
+func (h *ProjectHandler) JoinList(ctx context.Context, arg *connect.Request[projectv1.ProjectServiceJoinListRequest]) (*connect.Response[projectv1.ProjectServiceJoinListResponse], error) {
+	id := int(arg.Msg.Id)
+
+	users, err := h.ProjectUsecase.JoinList(id)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	res := make([]*projectv1.JoinMember, 0, len(users))
+	for _, user := range users {
+		res = append(res, &projectv1.JoinMember{
+			Id:   int32(user.ID),
+			Name: user.Username,
+		})
+	}
+
+	return &connect.Response[projectv1.ProjectServiceJoinListResponse]{
+		Msg: &projectv1.ProjectServiceJoinListResponse{
+			Members: res,
+		},
+	}, nil
+}

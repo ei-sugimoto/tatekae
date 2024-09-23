@@ -21,28 +21,6 @@ func NewBillHandler(u usecase.IBillUsecase) *BillHandler {
 	}
 }
 
-// func (h *BillHandler) Create(c context.Context, req *proto.CreateBillRequest) (*proto.CreateBillResponse, error) {
-// 	new := &model.Bill{
-// 		Price:     int(req.Price),
-// 		ProjectID: int(req.ProjectId),
-// 		SrcUser:   int(req.SrcUserId),
-// 		DstUser:   int(req.DstUserId),
-// 	}
-
-// 	res, err := h.u.Create(new)
-// 	if err != nil {
-// 		return nil, status.Errorf(codes.Internal, "failed to create project: %v", err)
-// 	}
-
-// 	return &proto.CreateBillResponse{
-// 		ID:        int32(res.ID),
-// 		Price:     int32(res.Price),
-// 		ProjectId: int32(res.ProjectID),
-// 		SrcUserId: int32(res.SrcUser),
-// 		DstUserId: int32(res.DstUser),
-// 	}, nil
-// }
-
 func (h *BillHandler) Create(ctx context.Context, arg *connect.Request[billv1.BillServiceCreateRequest]) (*connect.Response[billv1.BillServiceCreateResponse], error) {
 	new := &model.Bill{
 		Price:     int(arg.Msg.Price),
@@ -65,27 +43,7 @@ func (h *BillHandler) Create(ctx context.Context, arg *connect.Request[billv1.Bi
 	}), nil
 }
 
-// func (h *BillHandler) SumrizeByProject(c context.Context, req *proto.SumrizeRequest) (*proto.SumrizeResponse, error) {
-// 	res, err := h.u.Sumarize(int(req.ProjectId))
-// 	if err != nil {
-// 		return nil, status.Errorf(codes.Internal, "failed to sumarize project: %v", err)
-// 	}
-
-// 	sumarize := make([]*proto.SumrizeBill, 0, len(res))
-// 	for _, v := range res {
-// 		sumarize = append(sumarize, &proto.SumrizeBill{
-// 			SrcUserName: v.SrcUserName,
-// 			DstUserName: v.DstUserName,
-// 			Price:       int32(v.Amount),
-// 		})
-// 	}
-
-// 	return &proto.SumrizeResponse{
-// 		SumrizeBills: sumarize,
-// 	}, nil
-// }
-
-func (h *BillHandler) SumarizeByProject(ctx context.Context, arg *connect.Request[billv1.BillServiceSumrizeByProjectRequest]) (*connect.Response[billv1.BillServiceSumrizeByProjectResponse], error) {
+func (h *BillHandler) SumarizeByProject(ctx context.Context, arg *connect.Request[billv1.BillServiceSumarizeByProjectRequest]) (*connect.Response[billv1.BillServiceSumarizeByProjectResponse], error) {
 	res, err := h.u.Sumarize(int(arg.Msg.ProjectId))
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -100,7 +58,7 @@ func (h *BillHandler) SumarizeByProject(ctx context.Context, arg *connect.Reques
 		})
 	}
 
-	return connect.NewResponse(&billv1.BillServiceSumrizeByProjectResponse{
+	return connect.NewResponse(&billv1.BillServiceSumarizeByProjectResponse{
 		Bills: sumarize,
 	}), nil
 

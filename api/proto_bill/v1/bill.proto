@@ -6,7 +6,7 @@ option go_package = "github.com/ei-sugimoto/tatekae/api/gen/proto_bill/v1;billv1
 
 service BillService {
   rpc Create(BillServiceCreateRequest) returns (BillServiceCreateResponse);
-  rpc SumarizeByProject(BillServiceSumrizeByProjectRequest) returns (BillServiceSumrizeByProjectResponse);
+  rpc SumarizeByProject(BillServiceSumarizeByProjectRequest) returns (BillServiceSumarizeByProjectResponse);
   rpc List(BillServiceListRequest) returns (BillServiceListResponse);
 }
 
@@ -32,11 +32,11 @@ message BillServiceCreateResponse {
   int32 project_id = 5;
 }
 
-message BillServiceSumrizeByProjectRequest {
+message BillServiceSumarizeByProjectRequest {
   int32 project_id = 1;
 }
 
-message BillServiceSumrizeByProjectResponse {
+message BillServiceSumarizeByProjectResponse {
   repeated SumrizeBill bills = 1;
 }
 

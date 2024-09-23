@@ -64,6 +64,26 @@ func (p *PersistProject) Join(projectID, userID int) error {
 	return nil
 }
 
+func (p *PersistProject) JoinList(projectID int) ([]*model.User, error) {
+	ctx := context.Background()
+	project, err := p.db.Project.Query().Where(project.ID(projectID)).WithUsers().Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	users := project.Edges.Users
+	res := make([]*model.User, 0, len(users))
+	for _, user := range users {
+		res = append(res, &model.User{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		})
+	}
+
+	return res, nil
+}
+
 func (p *PersistProject) Get(projectID int) (*model.Project, error) {
 	ctx := context.Background()
 	project, err := p.db.Project.Query().Where(project.ID(projectID)).Only(ctx)

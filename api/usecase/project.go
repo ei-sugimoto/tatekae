@@ -9,6 +9,7 @@ type IProjectUsecase interface {
 	Create(*model.Project) (*model.Project, error)
 	List() ([]*model.Project, error)
 	Join(int, int) error
+	JoinList(int) ([]*model.User, error)
 	Get(int) (*model.Project, error)
 }
 
@@ -32,6 +33,10 @@ func (u *ProjectUsecase) List() ([]*model.Project, error) {
 
 func (u *ProjectUsecase) Join(projectID, userID int) error {
 	return u.repo.Join(projectID, userID)
+}
+
+func (u *ProjectUsecase) JoinList(projectID int) ([]*model.User, error) {
+	return u.repo.JoinList(projectID)
 }
 
 func (u *ProjectUsecase) Get(projectID int) (*model.Project, error) {

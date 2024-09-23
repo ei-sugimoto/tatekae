@@ -178,76 +178,76 @@ export class BillServiceCreateResponse extends Message<BillServiceCreateResponse
 }
 
 /**
- * @generated from message proto_bill.v1.BillServiceSumrizeByProjectRequest
+ * @generated from message proto_bill.v1.BillServiceSumarizeByProjectRequest
  */
-export class BillServiceSumrizeByProjectRequest extends Message<BillServiceSumrizeByProjectRequest> {
+export class BillServiceSumarizeByProjectRequest extends Message<BillServiceSumarizeByProjectRequest> {
   /**
    * @generated from field: int32 project_id = 1;
    */
   projectId = 0;
 
-  constructor(data?: PartialMessage<BillServiceSumrizeByProjectRequest>) {
+  constructor(data?: PartialMessage<BillServiceSumarizeByProjectRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "proto_bill.v1.BillServiceSumrizeByProjectRequest";
+  static readonly typeName = "proto_bill.v1.BillServiceSumarizeByProjectRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "project_id", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BillServiceSumrizeByProjectRequest {
-    return new BillServiceSumrizeByProjectRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BillServiceSumarizeByProjectRequest {
+    return new BillServiceSumarizeByProjectRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BillServiceSumrizeByProjectRequest {
-    return new BillServiceSumrizeByProjectRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BillServiceSumarizeByProjectRequest {
+    return new BillServiceSumarizeByProjectRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BillServiceSumrizeByProjectRequest {
-    return new BillServiceSumrizeByProjectRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BillServiceSumarizeByProjectRequest {
+    return new BillServiceSumarizeByProjectRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BillServiceSumrizeByProjectRequest | PlainMessage<BillServiceSumrizeByProjectRequest> | undefined, b: BillServiceSumrizeByProjectRequest | PlainMessage<BillServiceSumrizeByProjectRequest> | undefined): boolean {
-    return proto3.util.equals(BillServiceSumrizeByProjectRequest, a, b);
+  static equals(a: BillServiceSumarizeByProjectRequest | PlainMessage<BillServiceSumarizeByProjectRequest> | undefined, b: BillServiceSumarizeByProjectRequest | PlainMessage<BillServiceSumarizeByProjectRequest> | undefined): boolean {
+    return proto3.util.equals(BillServiceSumarizeByProjectRequest, a, b);
   }
 }
 
 /**
- * @generated from message proto_bill.v1.BillServiceSumrizeByProjectResponse
+ * @generated from message proto_bill.v1.BillServiceSumarizeByProjectResponse
  */
-export class BillServiceSumrizeByProjectResponse extends Message<BillServiceSumrizeByProjectResponse> {
+export class BillServiceSumarizeByProjectResponse extends Message<BillServiceSumarizeByProjectResponse> {
   /**
    * @generated from field: repeated proto_bill.v1.SumrizeBill bills = 1;
    */
   bills: SumrizeBill[] = [];
 
-  constructor(data?: PartialMessage<BillServiceSumrizeByProjectResponse>) {
+  constructor(data?: PartialMessage<BillServiceSumarizeByProjectResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "proto_bill.v1.BillServiceSumrizeByProjectResponse";
+  static readonly typeName = "proto_bill.v1.BillServiceSumarizeByProjectResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "bills", kind: "message", T: SumrizeBill, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BillServiceSumrizeByProjectResponse {
-    return new BillServiceSumrizeByProjectResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BillServiceSumarizeByProjectResponse {
+    return new BillServiceSumarizeByProjectResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BillServiceSumrizeByProjectResponse {
-    return new BillServiceSumrizeByProjectResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BillServiceSumarizeByProjectResponse {
+    return new BillServiceSumarizeByProjectResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BillServiceSumrizeByProjectResponse {
-    return new BillServiceSumrizeByProjectResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BillServiceSumarizeByProjectResponse {
+    return new BillServiceSumarizeByProjectResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BillServiceSumrizeByProjectResponse | PlainMessage<BillServiceSumrizeByProjectResponse> | undefined, b: BillServiceSumrizeByProjectResponse | PlainMessage<BillServiceSumrizeByProjectResponse> | undefined): boolean {
-    return proto3.util.equals(BillServiceSumrizeByProjectResponse, a, b);
+  static equals(a: BillServiceSumarizeByProjectResponse | PlainMessage<BillServiceSumarizeByProjectResponse> | undefined, b: BillServiceSumarizeByProjectResponse | PlainMessage<BillServiceSumarizeByProjectResponse> | undefined): boolean {
+    return proto3.util.equals(BillServiceSumarizeByProjectResponse, a, b);
   }
 }
 

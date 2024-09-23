@@ -2,13 +2,16 @@ import { Flex, Heading, Spacer, Text } from '@chakra-ui/react';
 import { useParams } from 'react-router-dom';
 import {
   BillServiceListResponse,
-  BillServiceSumrizeByProjectResponse,
+  BillServiceSumarizeByProjectResponse,
 } from '../gen/proto_bill/v1/bill_pb';
 import { ConnectError } from '@connectrpc/connect';
 import { Client } from '../use-client';
 import { BillService } from '../gen/proto_bill/v1/bill_connect';
 import { useEffect, useState } from 'react';
-import { ProjectServiceGetResponse } from '../gen/proto_project/v1/project_pb';
+import {
+  ProjectServiceGetResponse,
+  ProjectServiceJoinListResponse,
+} from '../gen/proto_project/v1/project_pb';
 import { ProjectService } from '../gen/proto_project/v1/project_connect';
 
 export function ProjectDetail() {
@@ -23,7 +26,10 @@ export function ProjectDetail() {
   );
 
   const [sumarize, setSumarize] =
-    useState<BillServiceSumrizeByProjectResponse | null>(null);
+    useState<BillServiceSumarizeByProjectResponse | null>(null);
+
+  const [memberList, setMemberList] =
+    useState<ProjectServiceJoinListResponse | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -53,6 +59,14 @@ export function ProjectDetail() {
         setSumarize(res);
       }
     });
+
+    getMemberList(parseInt(id)).then((res) => {
+      if (res instanceof ConnectError) {
+        setError(res);
+      } else {
+        setMemberList(res);
+      }
+    });
   }, [id]);
 
   if (error) {
@@ -65,14 +79,25 @@ export function ProjectDetail() {
     );
   }
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-  };
+  // const handleSubmit = async (event: React.FormEvent) => {
+  //   event.preventDefault();
+  // };
 
   return (
     <>
       <Heading>{project?.name}</Heading>
       <Spacer mt={5} />
+      <Text fontSize={'2xl'}>Member list</Text>
+      {memberList &&
+        memberList.members.map((user) => {
+          return (
+            <>
+              <Flex justifyContent={'center'} gap={5}>
+                <Text fontSize={'xl'}>{user.name}</Text>
+              </Flex>
+            </>
+          );
+        })}
       <Text fontSize={'2xl'}>bill list</Text>
       {billList &&
         billList.bills.map((bill) => {
@@ -101,6 +126,9 @@ export function ProjectDetail() {
             </>
           );
         })}
+
+      <Text fontSize={'2xl'}>new Bill</Text>
+      <form></form>
     </>
   );
 }
@@ -130,6 +158,15 @@ const getProjectDetail = async (
 const getSumerize = async (projectId: number) => {
   try {
     const res = await Client(BillService).sumarizeByProject({ projectId });
+    return res;
+  } catch (e) {
+    return ConnectError.from(e);
+  }
+};
+
+const getMemberList = async (projectId: number) => {
+  try {
+    const res = await Client(ProjectService).joinList({ id: projectId });
     return res;
   } catch (e) {
     return ConnectError.from(e);

@@ -172,3 +172,89 @@ export class LoginResponse extends Message<LoginResponse> {
   }
 }
 
+/**
+ * @generated from message proto_user.v1.GetByIDRequest
+ */
+export class GetByIDRequest extends Message<GetByIDRequest> {
+  /**
+   * @generated from field: int32 id = 1;
+   */
+  id = 0;
+
+  constructor(data?: PartialMessage<GetByIDRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "proto_user.v1.GetByIDRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetByIDRequest {
+    return new GetByIDRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetByIDRequest {
+    return new GetByIDRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetByIDRequest {
+    return new GetByIDRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetByIDRequest | PlainMessage<GetByIDRequest> | undefined, b: GetByIDRequest | PlainMessage<GetByIDRequest> | undefined): boolean {
+    return proto3.util.equals(GetByIDRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message proto_user.v1.GetByIDResponse
+ */
+export class GetByIDResponse extends Message<GetByIDResponse> {
+  /**
+   * @generated from field: int32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: string username = 2;
+   */
+  username = "";
+
+  /**
+   * @generated from field: string email = 3;
+   */
+  email = "";
+
+  constructor(data?: PartialMessage<GetByIDResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "proto_user.v1.GetByIDResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 2, name: "username", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetByIDResponse {
+    return new GetByIDResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetByIDResponse {
+    return new GetByIDResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetByIDResponse {
+    return new GetByIDResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetByIDResponse | PlainMessage<GetByIDResponse> | undefined, b: GetByIDResponse | PlainMessage<GetByIDResponse> | undefined): boolean {
+    return proto3.util.equals(GetByIDResponse, a, b);
+  }
+}
+

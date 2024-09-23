@@ -41,15 +41,18 @@ const (
 	ProjectServiceJoinProcedure = "/proto_project.v1.ProjectService/Join"
 	// ProjectServiceGetProcedure is the fully-qualified name of the ProjectService's Get RPC.
 	ProjectServiceGetProcedure = "/proto_project.v1.ProjectService/Get"
+	// ProjectServiceJoinListProcedure is the fully-qualified name of the ProjectService's JoinList RPC.
+	ProjectServiceJoinListProcedure = "/proto_project.v1.ProjectService/JoinList"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	projectServiceServiceDescriptor      = v1.File_proto_project_v1_project_proto.Services().ByName("ProjectService")
-	projectServiceCreateMethodDescriptor = projectServiceServiceDescriptor.Methods().ByName("Create")
-	projectServiceListMethodDescriptor   = projectServiceServiceDescriptor.Methods().ByName("List")
-	projectServiceJoinMethodDescriptor   = projectServiceServiceDescriptor.Methods().ByName("Join")
-	projectServiceGetMethodDescriptor    = projectServiceServiceDescriptor.Methods().ByName("Get")
+	projectServiceServiceDescriptor        = v1.File_proto_project_v1_project_proto.Services().ByName("ProjectService")
+	projectServiceCreateMethodDescriptor   = projectServiceServiceDescriptor.Methods().ByName("Create")
+	projectServiceListMethodDescriptor     = projectServiceServiceDescriptor.Methods().ByName("List")
+	projectServiceJoinMethodDescriptor     = projectServiceServiceDescriptor.Methods().ByName("Join")
+	projectServiceGetMethodDescriptor      = projectServiceServiceDescriptor.Methods().ByName("Get")
+	projectServiceJoinListMethodDescriptor = projectServiceServiceDescriptor.Methods().ByName("JoinList")
 )
 
 // ProjectServiceClient is a client for the proto_project.v1.ProjectService service.
@@ -58,6 +61,7 @@ type ProjectServiceClient interface {
 	List(context.Context, *connect.Request[v1.ProjectServiceListRequest]) (*connect.Response[v1.ProjectServiceListResponse], error)
 	Join(context.Context, *connect.Request[v1.ProjectServiceJoinRequest]) (*connect.Response[v1.ProjectServiceJoinResponse], error)
 	Get(context.Context, *connect.Request[v1.ProjectServiceGetRequest]) (*connect.Response[v1.ProjectServiceGetResponse], error)
+	JoinList(context.Context, *connect.Request[v1.ProjectServiceJoinListRequest]) (*connect.Response[v1.ProjectServiceJoinListResponse], error)
 }
 
 // NewProjectServiceClient constructs a client for the proto_project.v1.ProjectService service. By
@@ -94,15 +98,22 @@ func NewProjectServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(projectServiceGetMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		joinList: connect.NewClient[v1.ProjectServiceJoinListRequest, v1.ProjectServiceJoinListResponse](
+			httpClient,
+			baseURL+ProjectServiceJoinListProcedure,
+			connect.WithSchema(projectServiceJoinListMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // projectServiceClient implements ProjectServiceClient.
 type projectServiceClient struct {
-	create *connect.Client[v1.ProjectServiceCreateRequest, v1.ProjectServiceCreateResponse]
-	list   *connect.Client[v1.ProjectServiceListRequest, v1.ProjectServiceListResponse]
-	join   *connect.Client[v1.ProjectServiceJoinRequest, v1.ProjectServiceJoinResponse]
-	get    *connect.Client[v1.ProjectServiceGetRequest, v1.ProjectServiceGetResponse]
+	create   *connect.Client[v1.ProjectServiceCreateRequest, v1.ProjectServiceCreateResponse]
+	list     *connect.Client[v1.ProjectServiceListRequest, v1.ProjectServiceListResponse]
+	join     *connect.Client[v1.ProjectServiceJoinRequest, v1.ProjectServiceJoinResponse]
+	get      *connect.Client[v1.ProjectServiceGetRequest, v1.ProjectServiceGetResponse]
+	joinList *connect.Client[v1.ProjectServiceJoinListRequest, v1.ProjectServiceJoinListResponse]
 }
 
 // Create calls proto_project.v1.ProjectService.Create.
@@ -125,12 +136,18 @@ func (c *projectServiceClient) Get(ctx context.Context, req *connect.Request[v1.
 	return c.get.CallUnary(ctx, req)
 }
 
+// JoinList calls proto_project.v1.ProjectService.JoinList.
+func (c *projectServiceClient) JoinList(ctx context.Context, req *connect.Request[v1.ProjectServiceJoinListRequest]) (*connect.Response[v1.ProjectServiceJoinListResponse], error) {
+	return c.joinList.CallUnary(ctx, req)
+}
+
 // ProjectServiceHandler is an implementation of the proto_project.v1.ProjectService service.
 type ProjectServiceHandler interface {
 	Create(context.Context, *connect.Request[v1.ProjectServiceCreateRequest]) (*connect.Response[v1.ProjectServiceCreateResponse], error)
 	List(context.Context, *connect.Request[v1.ProjectServiceListRequest]) (*connect.Response[v1.ProjectServiceListResponse], error)
 	Join(context.Context, *connect.Request[v1.ProjectServiceJoinRequest]) (*connect.Response[v1.ProjectServiceJoinResponse], error)
 	Get(context.Context, *connect.Request[v1.ProjectServiceGetRequest]) (*connect.Response[v1.ProjectServiceGetResponse], error)
+	JoinList(context.Context, *connect.Request[v1.ProjectServiceJoinListRequest]) (*connect.Response[v1.ProjectServiceJoinListResponse], error)
 }
 
 // NewProjectServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -163,6 +180,12 @@ func NewProjectServiceHandler(svc ProjectServiceHandler, opts ...connect.Handler
 		connect.WithSchema(projectServiceGetMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	projectServiceJoinListHandler := connect.NewUnaryHandler(
+		ProjectServiceJoinListProcedure,
+		svc.JoinList,
+		connect.WithSchema(projectServiceJoinListMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/proto_project.v1.ProjectService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ProjectServiceCreateProcedure:
@@ -173,6 +196,8 @@ func NewProjectServiceHandler(svc ProjectServiceHandler, opts ...connect.Handler
 			projectServiceJoinHandler.ServeHTTP(w, r)
 		case ProjectServiceGetProcedure:
 			projectServiceGetHandler.ServeHTTP(w, r)
+		case ProjectServiceJoinListProcedure:
+			projectServiceJoinListHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -196,4 +221,8 @@ func (UnimplementedProjectServiceHandler) Join(context.Context, *connect.Request
 
 func (UnimplementedProjectServiceHandler) Get(context.Context, *connect.Request[v1.ProjectServiceGetRequest]) (*connect.Response[v1.ProjectServiceGetResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto_project.v1.ProjectService.Get is not implemented"))
+}
+
+func (UnimplementedProjectServiceHandler) JoinList(context.Context, *connect.Request[v1.ProjectServiceJoinListRequest]) (*connect.Response[v1.ProjectServiceJoinListResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto_project.v1.ProjectService.JoinList is not implemented"))
 }

@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { BillServiceCreateRequest, BillServiceCreateResponse, BillServiceListRequest, BillServiceListResponse, BillServiceSumrizeByProjectRequest, BillServiceSumrizeByProjectResponse } from "./bill_pb.js";
+import { BillServiceCreateRequest, BillServiceCreateResponse, BillServiceListRequest, BillServiceListResponse, BillServiceSumarizeByProjectRequest, BillServiceSumarizeByProjectResponse } from "./bill_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -26,8 +26,8 @@ export const BillService = {
      */
     sumarizeByProject: {
       name: "SumarizeByProject",
-      I: BillServiceSumrizeByProjectRequest,
-      O: BillServiceSumrizeByProjectResponse,
+      I: BillServiceSumarizeByProjectRequest,
+      O: BillServiceSumarizeByProjectResponse,
       kind: MethodKind.Unary,
     },
     /**
