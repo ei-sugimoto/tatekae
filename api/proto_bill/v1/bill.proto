@@ -6,7 +6,7 @@ option go_package = "github.com/ei-sugimoto/tatekae/api/gen/proto_bill/v1;billv1
 
 service BillService {
   rpc Create(BillServiceCreateRequest) returns (BillServiceCreateResponse);
-  rpc SumrizeByProject(BillServiceSumrizeByProjectRequest) returns (BillServiceSumrizeByProjectResponse);
+  rpc SumarizeByProject(BillServiceSumrizeByProjectRequest) returns (BillServiceSumrizeByProjectResponse);
 }
 
 message BillServiceCreateRequest {

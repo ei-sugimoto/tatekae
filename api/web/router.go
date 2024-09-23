@@ -1,18 +1,27 @@
 package web
 
 import (
+	"context"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
+	"time"
 
+	"connectrpc.com/connect"
+	"connectrpc.com/grpcreflect"
+	"github.com/ei-sugimoto/tatekae/api/gen/proto_bill/v1/billv1connect"
+	"github.com/ei-sugimoto/tatekae/api/gen/proto_project/v1/projectv1connect"
+	"github.com/ei-sugimoto/tatekae/api/gen/proto_user/v1/userv1connect"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure"
 	"github.com/ei-sugimoto/tatekae/api/infrastructure/persistence"
 	"github.com/ei-sugimoto/tatekae/api/usecase"
 	"github.com/ei-sugimoto/tatekae/api/web/handler"
-	"github.com/ei-sugimoto/tatekae/api/web/proto"
-	"google.golang.org/grpc/reflection"
+	"github.com/ei-sugimoto/tatekae/api/web/middleware"
+	"github.com/rs/cors"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 type Router struct {
@@ -22,6 +31,15 @@ type Router struct {
 
 func NewRouter() *Router {
 	engine := http.NewServeMux()
+	reflrector := grpcreflect.NewStaticReflector(
+		"proto_bill.v1.BillService",
+		"proto_project.v1.ProjectService",
+		"proto_user.v1.UserService",
+	)
+
+	engine.Handle(grpcreflect.NewHandlerV1(reflrector))
+	engine.Handle(grpcreflect.NewHandlerV1Alpha(reflrector))
+
 	return &Router{Engine: engine}
 }
 
@@ -31,69 +49,55 @@ func (r *Router) Run() {
 
 	db.Migrate()
 
-	if port := os.Getenv("PORT"); port == "" {
-		r.Port = ":8080"
-	} else {
-		r.Port = ":" + port
-	}
-	listener, err := net.Listen("tcp", r.Port)
-	if err != nil {
-		panic(err)
-	}
+	r.SetHandler()
 
-	r.NewUserService()
-	r.NewProjectService()
-	r.NewBillService()
-
-	reflection.Register(r.Engine)
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: cors.AllowAll().Handler(h2c.NewHandler(r.Engine, &http2.Server{})),
+	}
 
 	go func() {
-
-		log.Println("Server is running on port", r.Port)
-		if err := r.Engine.Serve(listener); err != nil {
-			log.Fatalf("Failed to serve: %v", err)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal(err)
 		}
-
 	}()
 
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
 	<-quit
-	log.Println("Shutting down server...")
-	r.Engine.GracefulStop()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatal(err)
+	}
+
+	db.Close()
 
 }
 
-func (r *Router) NewUserService() {
-
+func (r *Router) SetHandler() {
 	db := infrastructure.NewDB()
-	userPersistence := persistence.NewPersistUser(db)
-	userUsecase := usecase.NewUserUsecase(userPersistence)
-	userHandler := handler.NewUserHandler(userUsecase)
 
-	proto.RegisterUserServiceServer(r.Engine, userHandler)
+	UserPer := persistence.NewPersistUser(db)
+	ProjectPer := persistence.NewPersistProject(db)
+	BillPer := persistence.NewPersistBill(db)
 
-}
+	UserUsecase := usecase.NewUserUsecase(UserPer)
+	ProjectUsecase := usecase.NewProjectUsecase(ProjectPer)
+	BillUsecase := usecase.NewBillUsecase(BillPer, UserPer)
 
-func (r *Router) NewProjectService() {
+	UserHandler := handler.NewUserHandler(UserUsecase)
+	ProjectHandler := handler.NewProjectHandler(ProjectUsecase)
+	BillHandler := handler.NewBillHandler(BillUsecase)
 
-	db := infrastructure.NewDB()
-	projectPersistence := persistence.NewPersistProject(db)
-	projectUsecase := usecase.NewProjectUsecase(projectPersistence)
-	projectHandler := handler.NewProjectHandler(projectUsecase)
+	authInterceptor := connect.WithInterceptors(middleware.AuthUnaryInterceptor())
+	logInterceptor := connect.WithInterceptors(middleware.LoggingInterceptor())
 
-	proto.RegisterProjectServiceServer(r.Engine, projectHandler)
-
-}
-
-func (r *Router) NewBillService() {
-
-	db := infrastructure.NewDB()
-	billPersistence := persistence.NewPersistBill(db)
-	billPersistenceUser := persistence.NewPersistUser(db)
-	billUsecase := usecase.NewBillUsecase(billPersistence, billPersistenceUser)
-	billHandler := handler.NewBillHandler(billUsecase)
-
-	proto.RegisterBillServiceServer(r.Engine, billHandler)
+	r.Engine.Handle(userv1connect.NewUserServiceHandler(UserHandler, logInterceptor))
+	r.Engine.Handle(projectv1connect.NewProjectServiceHandler(ProjectHandler, logInterceptor, authInterceptor))
+	r.Engine.Handle(billv1connect.NewBillServiceHandler(BillHandler, logInterceptor, authInterceptor))
 
 }

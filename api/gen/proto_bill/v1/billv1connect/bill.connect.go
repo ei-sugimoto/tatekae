@@ -35,22 +35,22 @@ const (
 const (
 	// BillServiceCreateProcedure is the fully-qualified name of the BillService's Create RPC.
 	BillServiceCreateProcedure = "/proto_bill.v1.BillService/Create"
-	// BillServiceSumrizeByProjectProcedure is the fully-qualified name of the BillService's
-	// SumrizeByProject RPC.
-	BillServiceSumrizeByProjectProcedure = "/proto_bill.v1.BillService/SumrizeByProject"
+	// BillServiceSumarizeByProjectProcedure is the fully-qualified name of the BillService's
+	// SumarizeByProject RPC.
+	BillServiceSumarizeByProjectProcedure = "/proto_bill.v1.BillService/SumarizeByProject"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	billServiceServiceDescriptor                = v1.File_proto_bill_v1_bill_proto.Services().ByName("BillService")
-	billServiceCreateMethodDescriptor           = billServiceServiceDescriptor.Methods().ByName("Create")
-	billServiceSumrizeByProjectMethodDescriptor = billServiceServiceDescriptor.Methods().ByName("SumrizeByProject")
+	billServiceServiceDescriptor                 = v1.File_proto_bill_v1_bill_proto.Services().ByName("BillService")
+	billServiceCreateMethodDescriptor            = billServiceServiceDescriptor.Methods().ByName("Create")
+	billServiceSumarizeByProjectMethodDescriptor = billServiceServiceDescriptor.Methods().ByName("SumarizeByProject")
 )
 
 // BillServiceClient is a client for the proto_bill.v1.BillService service.
 type BillServiceClient interface {
 	Create(context.Context, *connect.Request[v1.BillServiceCreateRequest]) (*connect.Response[v1.BillServiceCreateResponse], error)
-	SumrizeByProject(context.Context, *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error)
+	SumarizeByProject(context.Context, *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error)
 }
 
 // NewBillServiceClient constructs a client for the proto_bill.v1.BillService service. By default,
@@ -69,10 +69,10 @@ func NewBillServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(billServiceCreateMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		sumrizeByProject: connect.NewClient[v1.BillServiceSumrizeByProjectRequest, v1.BillServiceSumrizeByProjectResponse](
+		sumarizeByProject: connect.NewClient[v1.BillServiceSumrizeByProjectRequest, v1.BillServiceSumrizeByProjectResponse](
 			httpClient,
-			baseURL+BillServiceSumrizeByProjectProcedure,
-			connect.WithSchema(billServiceSumrizeByProjectMethodDescriptor),
+			baseURL+BillServiceSumarizeByProjectProcedure,
+			connect.WithSchema(billServiceSumarizeByProjectMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -80,8 +80,8 @@ func NewBillServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 
 // billServiceClient implements BillServiceClient.
 type billServiceClient struct {
-	create           *connect.Client[v1.BillServiceCreateRequest, v1.BillServiceCreateResponse]
-	sumrizeByProject *connect.Client[v1.BillServiceSumrizeByProjectRequest, v1.BillServiceSumrizeByProjectResponse]
+	create            *connect.Client[v1.BillServiceCreateRequest, v1.BillServiceCreateResponse]
+	sumarizeByProject *connect.Client[v1.BillServiceSumrizeByProjectRequest, v1.BillServiceSumrizeByProjectResponse]
 }
 
 // Create calls proto_bill.v1.BillService.Create.
@@ -89,15 +89,15 @@ func (c *billServiceClient) Create(ctx context.Context, req *connect.Request[v1.
 	return c.create.CallUnary(ctx, req)
 }
 
-// SumrizeByProject calls proto_bill.v1.BillService.SumrizeByProject.
-func (c *billServiceClient) SumrizeByProject(ctx context.Context, req *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error) {
-	return c.sumrizeByProject.CallUnary(ctx, req)
+// SumarizeByProject calls proto_bill.v1.BillService.SumarizeByProject.
+func (c *billServiceClient) SumarizeByProject(ctx context.Context, req *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error) {
+	return c.sumarizeByProject.CallUnary(ctx, req)
 }
 
 // BillServiceHandler is an implementation of the proto_bill.v1.BillService service.
 type BillServiceHandler interface {
 	Create(context.Context, *connect.Request[v1.BillServiceCreateRequest]) (*connect.Response[v1.BillServiceCreateResponse], error)
-	SumrizeByProject(context.Context, *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error)
+	SumarizeByProject(context.Context, *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error)
 }
 
 // NewBillServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -112,18 +112,18 @@ func NewBillServiceHandler(svc BillServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(billServiceCreateMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
-	billServiceSumrizeByProjectHandler := connect.NewUnaryHandler(
-		BillServiceSumrizeByProjectProcedure,
-		svc.SumrizeByProject,
-		connect.WithSchema(billServiceSumrizeByProjectMethodDescriptor),
+	billServiceSumarizeByProjectHandler := connect.NewUnaryHandler(
+		BillServiceSumarizeByProjectProcedure,
+		svc.SumarizeByProject,
+		connect.WithSchema(billServiceSumarizeByProjectMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/proto_bill.v1.BillService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case BillServiceCreateProcedure:
 			billServiceCreateHandler.ServeHTTP(w, r)
-		case BillServiceSumrizeByProjectProcedure:
-			billServiceSumrizeByProjectHandler.ServeHTTP(w, r)
+		case BillServiceSumarizeByProjectProcedure:
+			billServiceSumarizeByProjectHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -137,6 +137,6 @@ func (UnimplementedBillServiceHandler) Create(context.Context, *connect.Request[
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto_bill.v1.BillService.Create is not implemented"))
 }
 
-func (UnimplementedBillServiceHandler) SumrizeByProject(context.Context, *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto_bill.v1.BillService.SumrizeByProject is not implemented"))
+func (UnimplementedBillServiceHandler) SumarizeByProject(context.Context, *connect.Request[v1.BillServiceSumrizeByProjectRequest]) (*connect.Response[v1.BillServiceSumrizeByProjectResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto_bill.v1.BillService.SumarizeByProject is not implemented"))
 }
