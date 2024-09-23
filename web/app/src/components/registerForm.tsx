@@ -23,6 +23,7 @@ const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
+    setError('');
     e.preventDefault();
     // Handle form submission logic here
     const res = await Register(username, email, password);
