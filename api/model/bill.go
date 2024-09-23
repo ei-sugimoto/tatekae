@@ -6,11 +6,13 @@ import (
 )
 
 type Bill struct {
-	ID        int `json:"id"`
-	Price     int `json:"price"`
-	ProjectID int `json:"project_id"`
-	SrcUser   int `json:"src_user"`
-	DstUser   int `json:"dst_user"`
+	ID        int    `json:"id"`
+	Price     int    `json:"price"`
+	ProjectID int    `json:"project_id"`
+	SrcUser   int    `json:"src_user"`
+	DstUser   int    `json:"dst_user"`
+	SrcName   string `json:"src_name"`
+	DstName   string `json:"dst_name"`
 }
 
 type Transaction struct {

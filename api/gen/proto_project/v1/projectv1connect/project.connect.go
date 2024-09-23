@@ -39,6 +39,8 @@ const (
 	ProjectServiceListProcedure = "/proto_project.v1.ProjectService/List"
 	// ProjectServiceJoinProcedure is the fully-qualified name of the ProjectService's Join RPC.
 	ProjectServiceJoinProcedure = "/proto_project.v1.ProjectService/Join"
+	// ProjectServiceGetProcedure is the fully-qualified name of the ProjectService's Get RPC.
+	ProjectServiceGetProcedure = "/proto_project.v1.ProjectService/Get"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -47,6 +49,7 @@ var (
 	projectServiceCreateMethodDescriptor = projectServiceServiceDescriptor.Methods().ByName("Create")
 	projectServiceListMethodDescriptor   = projectServiceServiceDescriptor.Methods().ByName("List")
 	projectServiceJoinMethodDescriptor   = projectServiceServiceDescriptor.Methods().ByName("Join")
+	projectServiceGetMethodDescriptor    = projectServiceServiceDescriptor.Methods().ByName("Get")
 )
 
 // ProjectServiceClient is a client for the proto_project.v1.ProjectService service.
@@ -54,6 +57,7 @@ type ProjectServiceClient interface {
 	Create(context.Context, *connect.Request[v1.ProjectServiceCreateRequest]) (*connect.Response[v1.ProjectServiceCreateResponse], error)
 	List(context.Context, *connect.Request[v1.ProjectServiceListRequest]) (*connect.Response[v1.ProjectServiceListResponse], error)
 	Join(context.Context, *connect.Request[v1.ProjectServiceJoinRequest]) (*connect.Response[v1.ProjectServiceJoinResponse], error)
+	Get(context.Context, *connect.Request[v1.ProjectServiceGetRequest]) (*connect.Response[v1.ProjectServiceGetResponse], error)
 }
 
 // NewProjectServiceClient constructs a client for the proto_project.v1.ProjectService service. By
@@ -84,6 +88,12 @@ func NewProjectServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(projectServiceJoinMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		get: connect.NewClient[v1.ProjectServiceGetRequest, v1.ProjectServiceGetResponse](
+			httpClient,
+			baseURL+ProjectServiceGetProcedure,
+			connect.WithSchema(projectServiceGetMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -92,6 +102,7 @@ type projectServiceClient struct {
 	create *connect.Client[v1.ProjectServiceCreateRequest, v1.ProjectServiceCreateResponse]
 	list   *connect.Client[v1.ProjectServiceListRequest, v1.ProjectServiceListResponse]
 	join   *connect.Client[v1.ProjectServiceJoinRequest, v1.ProjectServiceJoinResponse]
+	get    *connect.Client[v1.ProjectServiceGetRequest, v1.ProjectServiceGetResponse]
 }
 
 // Create calls proto_project.v1.ProjectService.Create.
@@ -109,11 +120,17 @@ func (c *projectServiceClient) Join(ctx context.Context, req *connect.Request[v1
 	return c.join.CallUnary(ctx, req)
 }
 
+// Get calls proto_project.v1.ProjectService.Get.
+func (c *projectServiceClient) Get(ctx context.Context, req *connect.Request[v1.ProjectServiceGetRequest]) (*connect.Response[v1.ProjectServiceGetResponse], error) {
+	return c.get.CallUnary(ctx, req)
+}
+
 // ProjectServiceHandler is an implementation of the proto_project.v1.ProjectService service.
 type ProjectServiceHandler interface {
 	Create(context.Context, *connect.Request[v1.ProjectServiceCreateRequest]) (*connect.Response[v1.ProjectServiceCreateResponse], error)
 	List(context.Context, *connect.Request[v1.ProjectServiceListRequest]) (*connect.Response[v1.ProjectServiceListResponse], error)
 	Join(context.Context, *connect.Request[v1.ProjectServiceJoinRequest]) (*connect.Response[v1.ProjectServiceJoinResponse], error)
+	Get(context.Context, *connect.Request[v1.ProjectServiceGetRequest]) (*connect.Response[v1.ProjectServiceGetResponse], error)
 }
 
 // NewProjectServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -140,6 +157,12 @@ func NewProjectServiceHandler(svc ProjectServiceHandler, opts ...connect.Handler
 		connect.WithSchema(projectServiceJoinMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	projectServiceGetHandler := connect.NewUnaryHandler(
+		ProjectServiceGetProcedure,
+		svc.Get,
+		connect.WithSchema(projectServiceGetMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/proto_project.v1.ProjectService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ProjectServiceCreateProcedure:
@@ -148,6 +171,8 @@ func NewProjectServiceHandler(svc ProjectServiceHandler, opts ...connect.Handler
 			projectServiceListHandler.ServeHTTP(w, r)
 		case ProjectServiceJoinProcedure:
 			projectServiceJoinHandler.ServeHTTP(w, r)
+		case ProjectServiceGetProcedure:
+			projectServiceGetHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -167,4 +192,8 @@ func (UnimplementedProjectServiceHandler) List(context.Context, *connect.Request
 
 func (UnimplementedProjectServiceHandler) Join(context.Context, *connect.Request[v1.ProjectServiceJoinRequest]) (*connect.Response[v1.ProjectServiceJoinResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto_project.v1.ProjectService.Join is not implemented"))
+}
+
+func (UnimplementedProjectServiceHandler) Get(context.Context, *connect.Request[v1.ProjectServiceGetRequest]) (*connect.Response[v1.ProjectServiceGetResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto_project.v1.ProjectService.Get is not implemented"))
 }

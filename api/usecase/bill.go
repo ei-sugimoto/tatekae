@@ -57,11 +57,19 @@ func (u *BillUsecase) Sumarize(projectID int) ([]*model.SumarizeBill, error) {
 	if err != nil {
 		return nil, err
 	}
+	srcUserMap := make(map[int]*model.User)
+	dstUserMap := make(map[int]*model.User)
+	for _, user := range Srcusers {
+		srcUserMap[user.ID] = user
+	}
+	for _, user := range Dstusers {
+		dstUserMap[user.ID] = user
+	}
 
-	for i, v := range calcRes {
+	for _, v := range calcRes {
 		sumarize = append(sumarize, &model.SumarizeBill{
-			SrcUserName: Srcusers[i].Username,
-			DstUserName: Dstusers[i].Username,
+			SrcUserName: srcUserMap[v.SrcUser].Username,
+			DstUserName: dstUserMap[v.DstUser].Username,
 			Amount:      v.Amount,
 		})
 	}

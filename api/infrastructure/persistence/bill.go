@@ -91,6 +91,8 @@ func (p *PersistBill) ListByProject(targetID int) ([]*model.Bill, error) {
 			ProjectID: v.Edges.Project.ID,
 			SrcUser:   v.Edges.SrcUser.ID,
 			DstUser:   v.Edges.DstUser.ID,
+			SrcName:   v.Edges.SrcUser.Username,
+			DstName:   v.Edges.DstUser.Username,
 		})
 	}
 	return bills, nil

@@ -62,6 +62,61 @@ export class BillServiceCreateRequest extends Message<BillServiceCreateRequest> 
 }
 
 /**
+ * @generated from message proto_bill.v1.Bill
+ */
+export class Bill extends Message<Bill> {
+  /**
+   * @generated from field: int32 id = 1;
+   */
+  id = 0;
+
+  /**
+   * @generated from field: int32 price = 2;
+   */
+  price = 0;
+
+  /**
+   * @generated from field: string src_user_name = 3;
+   */
+  srcUserName = "";
+
+  /**
+   * @generated from field: string dst_user_name = 4;
+   */
+  dstUserName = "";
+
+  constructor(data?: PartialMessage<Bill>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "proto_bill.v1.Bill";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 2, name: "price", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 3, name: "src_user_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "dst_user_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Bill {
+    return new Bill().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Bill {
+    return new Bill().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Bill {
+    return new Bill().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Bill | PlainMessage<Bill> | undefined, b: Bill | PlainMessage<Bill> | undefined): boolean {
+    return proto3.util.equals(Bill, a, b);
+  }
+}
+
+/**
  * @generated from message proto_bill.v1.BillServiceCreateResponse
  */
 export class BillServiceCreateResponse extends Message<BillServiceCreateResponse> {
@@ -242,6 +297,80 @@ export class SumrizeBill extends Message<SumrizeBill> {
 
   static equals(a: SumrizeBill | PlainMessage<SumrizeBill> | undefined, b: SumrizeBill | PlainMessage<SumrizeBill> | undefined): boolean {
     return proto3.util.equals(SumrizeBill, a, b);
+  }
+}
+
+/**
+ * @generated from message proto_bill.v1.BillServiceListRequest
+ */
+export class BillServiceListRequest extends Message<BillServiceListRequest> {
+  /**
+   * @generated from field: int32 project_id = 1;
+   */
+  projectId = 0;
+
+  constructor(data?: PartialMessage<BillServiceListRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "proto_bill.v1.BillServiceListRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "project_id", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BillServiceListRequest {
+    return new BillServiceListRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BillServiceListRequest {
+    return new BillServiceListRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BillServiceListRequest {
+    return new BillServiceListRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: BillServiceListRequest | PlainMessage<BillServiceListRequest> | undefined, b: BillServiceListRequest | PlainMessage<BillServiceListRequest> | undefined): boolean {
+    return proto3.util.equals(BillServiceListRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message proto_bill.v1.BillServiceListResponse
+ */
+export class BillServiceListResponse extends Message<BillServiceListResponse> {
+  /**
+   * @generated from field: repeated proto_bill.v1.Bill bills = 1;
+   */
+  bills: Bill[] = [];
+
+  constructor(data?: PartialMessage<BillServiceListResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "proto_bill.v1.BillServiceListResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "bills", kind: "message", T: Bill, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BillServiceListResponse {
+    return new BillServiceListResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BillServiceListResponse {
+    return new BillServiceListResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BillServiceListResponse {
+    return new BillServiceListResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: BillServiceListResponse | PlainMessage<BillServiceListResponse> | undefined, b: BillServiceListResponse | PlainMessage<BillServiceListResponse> | undefined): boolean {
+    return proto3.util.equals(BillServiceListResponse, a, b);
   }
 }
 

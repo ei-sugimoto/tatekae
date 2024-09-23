@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { BillServiceCreateRequest, BillServiceCreateResponse, BillServiceSumrizeByProjectRequest, BillServiceSumrizeByProjectResponse } from "./bill_pb.js";
+import { BillServiceCreateRequest, BillServiceCreateResponse, BillServiceListRequest, BillServiceListResponse, BillServiceSumrizeByProjectRequest, BillServiceSumrizeByProjectResponse } from "./bill_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -28,6 +28,15 @@ export const BillService = {
       name: "SumarizeByProject",
       I: BillServiceSumrizeByProjectRequest,
       O: BillServiceSumrizeByProjectResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc proto_bill.v1.BillService.List
+     */
+    list: {
+      name: "List",
+      I: BillServiceListRequest,
+      O: BillServiceListResponse,
       kind: MethodKind.Unary,
     },
   }

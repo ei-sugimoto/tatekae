@@ -4,14 +4,16 @@ import (
 	"context"
 
 	"github.com/ei-sugimoto/tatekae/api/infrastructure"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent/project"
 	"github.com/ei-sugimoto/tatekae/api/model"
+	"github.com/ei-sugimoto/tatekae/api/repo"
 )
 
 type PersistProject struct {
 	db *infrastructure.DB
 }
 
-func NewPersistProject(db *infrastructure.DB) *PersistProject {
+func NewPersistProject(db *infrastructure.DB) repo.ProjectRepo {
 	return &PersistProject{
 		db: db,
 	}
@@ -60,4 +62,19 @@ func (p *PersistProject) Join(projectID, userID int) error {
 	}
 
 	return nil
+}
+
+func (p *PersistProject) Get(projectID int) (*model.Project, error) {
+	ctx := context.Background()
+	project, err := p.db.Project.Query().Where(project.ID(projectID)).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Project{
+		ID:        project.ID,
+		Name:      project.Name,
+		CreatedAt: project.CreatedAt,
+		CreatedBy: project.CreatedBy,
+	}, nil
 }

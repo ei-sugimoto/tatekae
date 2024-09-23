@@ -5,17 +5,23 @@ import App from './App';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { DashBoard } from './pages/dashBeard';
 import ProtectedRoute from './components/protectedRoute';
+import { ProjectDetail } from './pages/projectDetail';
+import UnProtectedRoute from './components/unProtectedRoute';
 
 const rootElement = document.getElementById('root');
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <UnProtectedRoute element={<App />} />,
   },
   {
     path: '/dashboard',
     element: <ProtectedRoute element={<DashBoard />} />,
+  },
+  {
+    path: '/project/:id',
+    element: <ProtectedRoute element={<ProjectDetail />} />,
   },
 ]);
 

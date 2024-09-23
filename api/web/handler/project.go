@@ -22,22 +22,6 @@ func NewProjectHandler(projectUsecase usecase.IProjectUsecase) *ProjectHandler {
 	}
 }
 
-// func (h *ProjectHandler) Create(c context.Context, req *proto.CreateRequest) (*proto.CreateResponse, error) {
-// 	MyID := c.Value("id").(int)
-// 	new := &model.Project{
-// 		Name:      req.Name,
-// 		CreatedAt: time.Now(),
-// 		CreatedBy: MyID,
-// 	}
-
-// 	res, err := h.ProjectUsecase.Create(new)
-// 	if err != nil {
-// 		return nil, status.Errorf(codes.Internal, "failed to create project: %v", err)
-// 	}
-
-// 	return &proto.CreateResponse{Id: int32(res.ID), Name: res.Name}, nil
-// }
-
 func (h *ProjectHandler) Create(ctx context.Context, arg *connect.Request[projectv1.ProjectServiceCreateRequest]) (*connect.Response[projectv1.ProjectServiceCreateResponse], error) {
 	MyID := ctx.Value("id").(int)
 	new := &model.Project{
@@ -58,34 +42,6 @@ func (h *ProjectHandler) Create(ctx context.Context, arg *connect.Request[projec
 		},
 	}, nil
 }
-
-// func (h *ProjectHandler) List(c context.Context, req *proto.ListRequest) (*proto.ListResponse, error) {
-// 	projects, err := h.ProjectUsecase.List()
-// 	if err != nil {
-// 		return nil, status.Errorf(codes.Internal, "failed to list projects: %v", err)
-// 	}
-
-// 	res := make([]*proto.Project, 0, len(projects))
-// 	for _, project := range projects {
-// 		res = append(res, &proto.Project{
-// 			Id:   int32(project.ID),
-// 			Name: project.Name,
-// 		})
-// 	}
-
-// 	return &proto.ListResponse{Projects: res}, nil
-// }
-
-// func (h *ProjectHandler) Join(c context.Context, req *proto.JoinRequest) (*proto.JoinResponse, error) {
-// 	MyID := c.Value("id").(int)
-// 	MyUsername := c.Value("username").(string)
-// 	err := h.ProjectUsecase.Join(int(req.Id), MyID)
-// 	if err != nil {
-// 		return nil, status.Errorf(codes.Internal, "failed to join project: %v", err)
-// 	}
-
-// 	return &proto.JoinResponse{Id: req.Id, Name: MyUsername}, nil
-// }
 
 func (h *ProjectHandler) List(ctx context.Context, arg *connect.Request[projectv1.ProjectServiceListRequest]) (*connect.Response[projectv1.ProjectServiceListResponse], error) {
 	projects, err := h.ProjectUsecase.List()
@@ -125,4 +81,20 @@ func (h *ProjectHandler) Join(ctx context.Context, arg *connect.Request[projectv
 		},
 	}, nil
 
+}
+
+func (h *ProjectHandler) Get(ctx context.Context, arg *connect.Request[projectv1.ProjectServiceGetRequest]) (*connect.Response[projectv1.ProjectServiceGetResponse], error) {
+	id := int(arg.Msg.Id)
+
+	res, err := h.ProjectUsecase.Get(id)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return &connect.Response[projectv1.ProjectServiceGetResponse]{
+		Msg: &projectv1.ProjectServiceGetResponse{
+			Id:   int32(res.ID),
+			Name: res.Name,
+		},
+	}, nil
 }

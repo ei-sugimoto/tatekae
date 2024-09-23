@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ProjectServiceCreateRequest, ProjectServiceCreateResponse, ProjectServiceJoinRequest, ProjectServiceJoinResponse, ProjectServiceListRequest, ProjectServiceListResponse } from "./project_pb.js";
+import { ProjectServiceCreateRequest, ProjectServiceCreateResponse, ProjectServiceGetRequest, ProjectServiceGetResponse, ProjectServiceJoinRequest, ProjectServiceJoinResponse, ProjectServiceListRequest, ProjectServiceListResponse } from "./project_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -37,6 +37,15 @@ export const ProjectService = {
       name: "Join",
       I: ProjectServiceJoinRequest,
       O: ProjectServiceJoinResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc proto_project.v1.ProjectService.Get
+     */
+    get: {
+      name: "Get",
+      I: ProjectServiceGetRequest,
+      O: ProjectServiceGetResponse,
       kind: MethodKind.Unary,
     },
   }

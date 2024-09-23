@@ -8,6 +8,7 @@ service ProjectService {
   rpc Create(ProjectServiceCreateRequest) returns (ProjectServiceCreateResponse);
   rpc List(ProjectServiceListRequest) returns (ProjectServiceListResponse);
   rpc Join(ProjectServiceJoinRequest) returns (ProjectServiceJoinResponse);
+  rpc Get(ProjectServiceGetRequest) returns (ProjectServiceGetResponse);
 }
 
 message Project {
@@ -35,6 +36,15 @@ message ProjectServiceJoinRequest {
 }
 
 message ProjectServiceJoinResponse {
+  int32 id = 1;
+  string name = 2;
+}
+
+message ProjectServiceGetRequest {
+  int32 id = 1;
+}
+
+message ProjectServiceGetResponse {
   int32 id = 1;
   string name = 2;
 }

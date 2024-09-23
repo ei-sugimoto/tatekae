@@ -8,8 +8,6 @@ import (
 	"github.com/ei-sugimoto/tatekae/api/model"
 	"github.com/ei-sugimoto/tatekae/api/usecase"
 	"github.com/ei-sugimoto/tatekae/api/web/proto"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type BillHandler struct {
@@ -67,28 +65,6 @@ func (h *BillHandler) Create(ctx context.Context, arg *connect.Request[billv1.Bi
 	}), nil
 }
 
-func (h *BillHandler) ListByProject(c context.Context, req *proto.ListByProjectRequest) (*proto.ListByProjectResponse, error) {
-	res, err := h.u.ListByProject(int(req.ProjectId))
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to list project: %v", err)
-	}
-
-	bills := make([]*proto.Bill, 0, len(res))
-	for _, v := range res {
-		bills = append(bills, &proto.Bill{
-			ID:        int32(v.ID),
-			Price:     int32(v.Price),
-			ProjectId: int32(v.ProjectID),
-			SrcUserId: int32(v.SrcUser),
-			DstUserId: int32(v.DstUser),
-		})
-	}
-
-	return &proto.ListByProjectResponse{
-		Bills: bills,
-	}, nil
-}
-
 // func (h *BillHandler) SumrizeByProject(c context.Context, req *proto.SumrizeRequest) (*proto.SumrizeResponse, error) {
 // 	res, err := h.u.Sumarize(int(req.ProjectId))
 // 	if err != nil {
@@ -128,4 +104,25 @@ func (h *BillHandler) SumarizeByProject(ctx context.Context, arg *connect.Reques
 		Bills: sumarize,
 	}), nil
 
+}
+
+func (h *BillHandler) List(ctx context.Context, arg *connect.Request[billv1.BillServiceListRequest]) (*connect.Response[billv1.BillServiceListResponse], error) {
+	res, err := h.u.ListByProject(int(arg.Msg.ProjectId))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	bills := make([]*billv1.Bill, 0, len(res))
+	for _, v := range res {
+		bills = append(bills, &billv1.Bill{
+			Id:          int32(v.ID),
+			Price:       int32(v.Price),
+			SrcUserName: v.SrcName,
+			DstUserName: v.DstName,
+		})
+	}
+
+	return connect.NewResponse(&billv1.BillServiceListResponse{
+		Bills: bills,
+	}), nil
 }

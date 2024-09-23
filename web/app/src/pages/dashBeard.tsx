@@ -7,10 +7,12 @@ import {
 import { Client } from '../use-client';
 import { useEffect, useState } from 'react';
 import { Button, Flex, Heading, Spacer, Text } from '@chakra-ui/react';
+import { Link } from 'react-router-dom';
 
 export function DashBoard() {
   const [list, setList] = useState<ProjectServiceListResponse>();
   const [error, setError] = useState<string | null>(null);
+
   const fetchList = async () => {
     const res = await getProjectList();
     if (res instanceof ConnectError) {
@@ -48,7 +50,9 @@ export function DashBoard() {
               alignContent={'center'}
             >
               <>
-                <Text fontSize={'xl'}>{project.name}</Text>
+                <Link to={`/project/${project.id}`}>
+                  <Text fontSize={'xl'}>{project.name}</Text>
+                </Link>
                 <Spacer p={8} />
               </>
               <>
