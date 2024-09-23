@@ -5,6 +5,7 @@ import { LoginResponse } from '../gen/proto_user/v1/user_pb';
 import { ConnectError } from '@connectrpc/connect';
 import {
   Button,
+  Flex,
   FormControl,
   FormLabel,
   Input,
@@ -13,12 +14,15 @@ import {
   Wrap,
   WrapItem,
 } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const toast = useToast();
+  const navigate = useNavigate();
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const res = await Login(email, password);
@@ -29,57 +33,60 @@ const LoginForm: React.FC = () => {
       return;
     }
 
-    console.log('LoginResponse:', res);
-    console.log('Email:', email);
-    console.log('Password:', password);
+    navigate('/dashboard');
+    localStorage.setItem('token', res.token);
+
+    return;
   };
 
   return (
     <Wrap>
       <form onSubmit={handleSubmit}>
-        <div>
-          <FormControl>
-            <FormLabel>Email:</FormLabel>
-            <Input
-              type='email'
-              id='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </FormControl>
-        </div>
-        <div>
-          <FormControl>
-            <FormLabel>Password:</FormLabel>
-            <Input
-              type='password'
-              id='password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </FormControl>
-        </div>
-        <Spacer p={5} />
-        <WrapItem>
-          <Button
-            type='submit'
-            onClick={() => {
-              if (error) {
-                toast({
-                  title: 'ログインエラー',
-                  description: error,
-                  status: 'error',
-                  duration: 1000,
-                  isClosable: true,
-                });
-              }
-            }}
-          >
-            Login
-          </Button>
-        </WrapItem>
+        <Flex direction={'column'} justify={'center'} align={'center'}>
+          <div>
+            <FormControl>
+              <FormLabel>Email:</FormLabel>
+              <Input
+                type='email'
+                id='email'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </FormControl>
+          </div>
+          <div>
+            <FormControl>
+              <FormLabel>Password:</FormLabel>
+              <Input
+                type='password'
+                id='password'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </FormControl>
+          </div>
+          <Spacer p={5} />
+          <WrapItem>
+            <Button
+              type='submit'
+              onClick={() => {
+                if (error) {
+                  toast({
+                    title: 'ログインエラー',
+                    description: error,
+                    status: 'error',
+                    duration: 1000,
+                    isClosable: true,
+                  });
+                }
+              }}
+            >
+              Login
+            </Button>
+          </WrapItem>
+        </Flex>
       </form>
     </Wrap>
   );

@@ -9,66 +9,93 @@ import {
   FormLabel,
   Input,
   Spacer,
+  useToast,
+  Wrap,
 } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 
 const RegisterForm: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const toast = useToast();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission logic here
-    const res = Register(username, email, password);
+    const res = await Register(username, email, password);
     if (res instanceof ConnectError) {
       console.error('Error:', res);
+      setError(res.message);
       return;
     }
+
     console.log('RegisterResponse:', res);
-    console.log({ username, email, password });
+    localStorage.setItem('token', res.token);
+    navigate('/dashboard');
+    return;
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <FormControl>
-          <FormLabel>Username:</FormLabel>
-          <Input
-            type='text'
-            id='username'
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </FormControl>
-      </div>
-      <div>
-        <FormControl>
-          <FormLabel>Email:</FormLabel>
-          <Input
-            type='email'
-            id='email'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </FormControl>
-      </div>
-      <div>
-        <FormControl>
-          <FormLabel>Password:</FormLabel>
-          <Input
-            type='password'
-            id='password'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </FormControl>
-      </div>
-      <Spacer p={5} />
-      <Button type='submit'>Register</Button>
-    </form>
+    <Wrap>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <FormControl>
+            <FormLabel>Username:</FormLabel>
+            <Input
+              type='text'
+              id='username'
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </FormControl>
+        </div>
+        <div>
+          <FormControl>
+            <FormLabel>Email:</FormLabel>
+            <Input
+              type='email'
+              id='email'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </FormControl>
+        </div>
+        <div>
+          <FormControl>
+            <FormLabel>Password:</FormLabel>
+            <Input
+              type='password'
+              id='password'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </FormControl>
+        </div>
+        <Spacer p={5} />
+        <Button
+          type='submit'
+          onClick={() => {
+            if (error) {
+              toast({
+                title: 'ログインエラー',
+                description: error,
+                status: 'error',
+                duration: 1000,
+                isClosable: true,
+              });
+            }
+          }}
+        >
+          Register
+        </Button>
+      </form>
+    </Wrap>
   );
 };
 
