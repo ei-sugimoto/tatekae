@@ -2,9 +2,11 @@ package handler
 
 import (
 	"context"
+	"log"
 
 	"connectrpc.com/connect"
 	billv1 "github.com/ei-sugimoto/tatekae/api/gen/proto_bill/v1"
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent"
 	"github.com/ei-sugimoto/tatekae/api/model"
 	"github.com/ei-sugimoto/tatekae/api/usecase"
 	"github.com/ei-sugimoto/tatekae/api/web/proto"
@@ -46,7 +48,15 @@ func (h *BillHandler) Create(ctx context.Context, arg *connect.Request[billv1.Bi
 func (h *BillHandler) SumarizeByProject(ctx context.Context, arg *connect.Request[billv1.BillServiceSumarizeByProjectRequest]) (*connect.Response[billv1.BillServiceSumarizeByProjectResponse], error) {
 	res, err := h.u.Sumarize(int(arg.Msg.ProjectId))
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, err)
+		if ent.IsNotFound(err) {
+			return connect.NewResponse(&billv1.BillServiceSumarizeByProjectResponse{
+				Bills: make([]*billv1.SumrizeBill, 0),
+			}), nil
+		} else {
+			log.Println(err)
+			return nil, connect.NewError(connect.CodeInternal, err)
+		}
+
 	}
 
 	sumarize := make([]*billv1.SumrizeBill, 0, len(res))
@@ -66,8 +76,16 @@ func (h *BillHandler) SumarizeByProject(ctx context.Context, arg *connect.Reques
 
 func (h *BillHandler) List(ctx context.Context, arg *connect.Request[billv1.BillServiceListRequest]) (*connect.Response[billv1.BillServiceListResponse], error) {
 	res, err := h.u.ListByProject(int(arg.Msg.ProjectId))
+
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, err)
+		if ent.IsNotFound(err) {
+			return connect.NewResponse(&billv1.BillServiceListResponse{
+				Bills: make([]*billv1.Bill, 0),
+			}), nil
+		} else {
+			return nil, connect.NewError(connect.CodeInternal, err)
+		}
+
 	}
 
 	bills := make([]*billv1.Bill, 0, len(res))

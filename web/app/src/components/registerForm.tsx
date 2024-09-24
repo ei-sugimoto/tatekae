@@ -84,8 +84,8 @@ const RegisterForm: React.FC = () => {
           onClick={() => {
             if (error) {
               toast({
-                title: 'ログインエラー',
-                description: error,
+                title: '登録エラー',
+                description: 'すでに登録済みかサーバにエラーが発生しました。',
                 status: 'error',
                 duration: 1000,
                 isClosable: true,

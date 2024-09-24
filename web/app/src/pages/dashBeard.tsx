@@ -8,6 +8,7 @@ import { Client } from '../use-client';
 import { useEffect, useState } from 'react';
 import { Button, Flex, Heading, Spacer, Text } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
+import { ProjectForm } from '../components/projectForm';
 
 export function DashBoard() {
   const [list, setList] = useState<ProjectServiceListResponse>();
@@ -68,6 +69,8 @@ export function DashBoard() {
             </Flex>
           );
         })}
+        <Heading mt={5}>Create Project</Heading>
+        <ProjectForm onRegisterComplete={fetchList} />
       </Flex>
     </>
   );

@@ -1,8 +1,9 @@
 package model
 
 import (
-	"errors"
 	"sort"
+
+	"github.com/ei-sugimoto/tatekae/api/infrastructure/ent"
 )
 
 type Bill struct {
@@ -37,7 +38,7 @@ type PersonBlance struct {
 func CalcucateSummaries(bills []*Bill) ([]Transaction, error) {
 
 	if len(bills) == 0 {
-		return nil, errors.New("no bills")
+		return nil, &ent.NotFoundError{}
 	}
 
 	balances := make(map[int]int)

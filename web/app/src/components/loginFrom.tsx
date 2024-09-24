@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { MeAtom } from '../utils/meAtom';
 
-const LoginForm: React.FC = () => {
+export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,6 +28,7 @@ const LoginForm: React.FC = () => {
   const [me, setMe] = useAtom(MeAtom);
 
   const handleSubmit = async (event: React.FormEvent) => {
+    setError('');
     event.preventDefault();
     const res = await Login(email, password);
 
@@ -78,10 +79,10 @@ const LoginForm: React.FC = () => {
             <Button
               type='submit'
               onClick={() => {
-                if (error) {
+                if (error != '') {
                   toast({
                     title: 'ログインエラー',
-                    description: error,
+                    description: 'パスワードかメールアドレスが間違っています',
                     status: 'error',
                     duration: 1000,
                     isClosable: true,
