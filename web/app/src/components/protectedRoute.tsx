@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
   const [val] = useAtom(MeAtom);
-  if (!CheckExistToken()) {
+  if (!CheckExistToken() || !val) {
     return <Navigate to='/' replace />;
   }
   return (

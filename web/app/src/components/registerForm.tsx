@@ -20,23 +20,34 @@ const RegisterForm: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const setMe = useSetAtom(MeAtom);
   const toast = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    setError('');
     e.preventDefault();
     const res = await Register(username, email, password);
     if (res instanceof ConnectError) {
-      console.error('Error:', res);
-      setError(res.message);
+      toast({
+        title: '登録エラー',
+        description: 'すでに登録済みかサーバにエラーが発生しました。',
+        status: 'error',
+        duration: 1000,
+        isClosable: true,
+      });
+
       return;
     }
 
     localStorage.setItem('token', res.token);
     setMe({ id: res.id, name: res.username });
+    toast({
+      title: '登録成功',
+      description: '登録に成功しました',
+      status: 'success',
+      duration: 1000,
+      isClosable: true,
+    });
     navigate('/dashboard');
     return;
   };
@@ -81,22 +92,7 @@ const RegisterForm: React.FC = () => {
           </FormControl>
         </div>
         <Spacer p={5} />
-        <Button
-          type='submit'
-          onClick={() => {
-            if (error) {
-              toast({
-                title: '登録エラー',
-                description: 'すでに登録済みかサーバにエラーが発生しました。',
-                status: 'error',
-                duration: 1000,
-                isClosable: true,
-              });
-            }
-          }}
-        >
-          Register
-        </Button>
+        <Button type='submit'>Register</Button>
       </form>
     </Wrap>
   );

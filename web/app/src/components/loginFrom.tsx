@@ -21,24 +21,34 @@ import { MeAtom } from '../utils/meAtom';
 export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const toast = useToast();
   const navigate = useNavigate();
 
   const setMe = useSetAtom(MeAtom);
 
   const handleSubmit = async (event: React.FormEvent) => {
-    setError('');
     event.preventDefault();
     const res = await Login(email, password);
 
     if (res instanceof ConnectError) {
-      console.error('Error:', res);
-      setError(res.message);
+      toast({
+        title: 'ログインエラー',
+        description: 'ユーザが存在しません',
+        status: 'error',
+        duration: 1000,
+        isClosable: true,
+      });
       return;
     }
     localStorage.setItem('token', res.token);
     setMe((prev) => ({ ...prev, id: res.id, name: res.username }));
+    toast({
+      title: 'ログイン成功',
+      description: 'ログインに成功しました',
+      status: 'success',
+      duration: 1000,
+      isClosable: true,
+    });
     navigate('/dashboard');
 
     return;
@@ -74,30 +84,7 @@ export const LoginForm: React.FC = () => {
           </div>
           <Spacer p={5} />
           <WrapItem>
-            <Button
-              type='submit'
-              onClick={() => {
-                if (error != '') {
-                  toast({
-                    title: 'ログインエラー',
-                    description: 'パスワードかメールアドレスが間違っています',
-                    status: 'error',
-                    duration: 1000,
-                    isClosable: true,
-                  });
-                } else {
-                  toast({
-                    title: 'ログイン成功',
-                    description: 'ログインに成功しました',
-                    status: 'success',
-                    duration: 1000,
-                    isClosable: true,
-                  });
-                }
-              }}
-            >
-              Login
-            </Button>
+            <Button type='submit'>Login</Button>
           </WrapItem>
         </Flex>
       </form>
