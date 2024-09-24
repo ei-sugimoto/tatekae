@@ -2,7 +2,7 @@ name: Build And Push Container Image
 
 on:
   push:
-    tags:
+    branches:
       - master
 
 env:
