@@ -45,10 +45,8 @@ services:
       - db
     tty: true
     working_dir: /workspace/app
-    command: npm run dev
+    command: bash -c "bun install && bun run dev"
     stdin_open: true
-
-
 
 volumes:
   db:

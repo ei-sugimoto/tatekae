@@ -1,4 +1,5 @@
 FROM node:lts
 COPY . /workspace
 WORKDIR /workspace/app
+RUN npm install -g bun
 
