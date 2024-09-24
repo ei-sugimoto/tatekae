@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: python-test
+  IMAGE_NAME: api
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
