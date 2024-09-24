@@ -37,7 +37,7 @@ jobs:
         working-directory: api
         run: |
           docker buildx build \
-            --file api/Dockerfile.Prod \
+            --file Dockerfile.Prod \
             --platform linux/amd64,linux/arm64 \
             --push \
             -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }} .
