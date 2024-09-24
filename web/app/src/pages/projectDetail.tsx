@@ -8,13 +8,9 @@ import { ConnectError } from '@connectrpc/connect';
 import { Client } from '../use-client';
 import { BillService } from '../gen/proto_bill/v1/bill_connect';
 import { useEffect, useState } from 'react';
-import {
-  ProjectServiceGetResponse,
-  ProjectServiceJoinListResponse,
-} from '../gen/proto_project/v1/project_pb';
+import { ProjectServiceGetResponse } from '../gen/proto_project/v1/project_pb';
 import { ProjectService } from '../gen/proto_project/v1/project_connect';
-import { useAtomValue } from 'jotai';
-import { MeAtom } from '../utils/meAtom';
+import BillForm from '../components/billForm';
 
 export function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -30,16 +26,30 @@ export function ProjectDetail() {
   const [sumarize, setSumarize] =
     useState<BillServiceSumarizeByProjectResponse | null>(null);
 
-  const [memberList, setMemberList] =
-    useState<ProjectServiceJoinListResponse | null>(null);
-
-  const me = useAtomValue(MeAtom);
-
+  const [memberList, setMemberList] = useState<Array<{
+    id: number;
+    name: string;
+  }> | null>(null);
   useEffect(() => {
     if (!id) {
       setError(new ConnectError('id is not provided'));
       return;
     }
+
+    fetch(id);
+  }, [id]);
+
+  if (error) {
+    return (
+      <>
+        <Heading>Project Detail</Heading>
+        <Spacer mt={5} />
+        <Text fontSize={'2xl'}>{error.message}</Text>
+      </>
+    );
+  }
+
+  const fetch = (id: string) => {
     getBillList(parseInt(id)).then((res) => {
       if (res instanceof ConnectError) {
         setError(res);
@@ -68,72 +78,62 @@ export function ProjectDetail() {
       if (res instanceof ConnectError) {
         setError(res);
       } else {
-        setMemberList(res);
+        const response = res.members.map((member) => {
+          return { id: member.id, name: member.name };
+        });
+        setMemberList(response);
       }
     });
-  }, [id]);
-
-  if (error) {
-    return (
-      <>
-        <Heading>Project Detail</Heading>
-        <Spacer mt={5} />
-        <Text fontSize={'2xl'}>{error.message}</Text>
-      </>
-    );
-  }
-
-  // const handleSubmit = async (event: React.FormEvent) => {
-  //   event.preventDefault();
-  // };
+  };
 
   return (
     <>
-      <Heading>{project?.name}</Heading>
-      <Spacer mt={5} />
-      <Text fontSize={'2xl'}>Member list</Text>
-      {memberList &&
-        memberList.members.map((user) => {
-          return (
-            <>
-              <Flex justifyContent={'center'} gap={5}>
-                <Text fontSize={'xl'}>{user.name}</Text>
-              </Flex>
-            </>
-          );
-        })}
-      <Text fontSize={'2xl'}>bill list</Text>
-      {billList &&
-        billList.bills.map((bill) => {
-          return (
-            <>
-              <Flex justifyContent={'center'} gap={5}>
-                <Text fontSize={'xl'}>
-                  {bill.srcUserName} ⇒ {bill.dstUserName}
-                </Text>
-                <Text fontSize={'xl'}>￥{bill.price}</Text>
-              </Flex>
-            </>
-          );
-        })}
-      <Text fontSize={'2xl'}>Sumarize</Text>
-      {sumarize &&
-        sumarize.bills.map((bill) => {
-          return (
-            <>
-              <Flex justifyContent={'center'} gap={5}>
-                <Text fontSize={'xl'}>
-                  {bill.srcUserName} ⇒ {bill.dstUserName}
-                </Text>
-                <Text fontSize={'xl'}>￥{bill.price}</Text>
-              </Flex>
-            </>
-          );
-        })}
+      <Flex direction={'column'} align={'center'}>
+        <Heading>{project?.name}</Heading>
+        <Spacer mt={5} />
+        <Text fontSize={'2xl'}>Member list</Text>
+        {memberList &&
+          memberList.map((user) => {
+            return (
+              <>
+                <Flex justifyContent={'center'} gap={5}>
+                  <Text fontSize={'xl'}>{user.name}</Text>
+                </Flex>
+              </>
+            );
+          })}
+        <Text fontSize={'2xl'}>bill list</Text>
+        {billList &&
+          billList.bills.map((bill) => {
+            return (
+              <>
+                <Flex justifyContent={'center'} gap={5}>
+                  <Text fontSize={'xl'}>
+                    {bill.srcUserName} ⇒ {bill.dstUserName}
+                  </Text>
+                  <Text fontSize={'xl'}>￥{bill.price}</Text>
+                </Flex>
+              </>
+            );
+          })}
+        <Text fontSize={'2xl'}>Sumarize</Text>
+        {sumarize &&
+          sumarize.bills.map((bill) => {
+            return (
+              <>
+                <Flex justifyContent={'center'} gap={5}>
+                  <Text fontSize={'xl'}>
+                    {bill.srcUserName} ⇒ {bill.dstUserName}
+                  </Text>
+                  <Text fontSize={'xl'}>￥{bill.price}</Text>
+                </Flex>
+              </>
+            );
+          })}
 
-      <Text fontSize={'2xl'}>new Bill</Text>
-      <form></form>
-      <Text>{me?.name}</Text>
+        <Text fontSize={'2xl'}>new Bill</Text>
+        <BillForm onRegisterComplete={fetch} selectItems={memberList ?? []} />
+      </Flex>
     </>
   );
 }

@@ -1,13 +1,10 @@
-import { atom, createStore } from 'jotai';
+import { atom } from 'jotai';
 
 type MeType = {
   id: number;
   name: string;
 };
 
-const store = createStore();
 const MeAtom = atom<MeType | undefined>();
 
-store.set(MeAtom, undefined);
-
-export { MeAtom, store };
+export { MeAtom };

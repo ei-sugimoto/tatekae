@@ -65,8 +65,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                 if (error != '') {
                   toast({
                     title: 'プロジェクト作成エラー',
-                    description:
-                      'プロジェクト名かプロジェクト説明が入力されていません',
+                    description: 'プロジェクト名が入力されていません',
                     status: 'error',
                     duration: 1000,
                     isClosable: true,

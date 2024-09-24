@@ -13,19 +13,21 @@ import {
   Wrap,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
+import { useSetAtom } from 'jotai';
+import { MeAtom } from '../utils/meAtom';
 
 const RegisterForm: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const setMe = useSetAtom(MeAtom);
   const toast = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     setError('');
     e.preventDefault();
-    // Handle form submission logic here
     const res = await Register(username, email, password);
     if (res instanceof ConnectError) {
       console.error('Error:', res);
@@ -33,8 +35,8 @@ const RegisterForm: React.FC = () => {
       return;
     }
 
-    console.log('RegisterResponse:', res);
     localStorage.setItem('token', res.token);
+    setMe({ id: res.id, name: res.username });
     navigate('/dashboard');
     return;
   };

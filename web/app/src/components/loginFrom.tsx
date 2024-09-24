@@ -15,7 +15,7 @@ import {
   WrapItem,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { useAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { MeAtom } from '../utils/meAtom';
 
 export const LoginForm: React.FC = () => {
@@ -25,7 +25,7 @@ export const LoginForm: React.FC = () => {
   const toast = useToast();
   const navigate = useNavigate();
 
-  const [me, setMe] = useAtom(MeAtom);
+  const setMe = useSetAtom(MeAtom);
 
   const handleSubmit = async (event: React.FormEvent) => {
     setError('');
@@ -39,8 +39,6 @@ export const LoginForm: React.FC = () => {
     }
     localStorage.setItem('token', res.token);
     setMe((prev) => ({ ...prev, id: res.id, name: res.username }));
-    console.log(me);
-    console.log(res);
     navigate('/dashboard');
 
     return;
@@ -84,6 +82,14 @@ export const LoginForm: React.FC = () => {
                     title: 'ログインエラー',
                     description: 'パスワードかメールアドレスが間違っています',
                     status: 'error',
+                    duration: 1000,
+                    isClosable: true,
+                  });
+                } else {
+                  toast({
+                    title: 'ログイン成功',
+                    description: 'ログインに成功しました',
+                    status: 'success',
                     duration: 1000,
                     isClosable: true,
                   });
