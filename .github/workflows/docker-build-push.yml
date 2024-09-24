@@ -18,6 +18,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Get latest tag
+        id: get_latest_tag
+        run: echo "LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
+
       # 1. ghcrにログインする
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -26,10 +30,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       # 2. コンテナイメージをビルド・pushする
-      - name: Build and Push Container
+      - name: Build api
         uses: docker/build-push-action@v5
         with:
           push: true
           context: ./api
           file: ./api/Dockerfile.Prod
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.LATEST_TAG }}
+
+      - name: Build web
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          context: ./web
+          file: ./web/Dockerfile.Prod
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/web:${{ env.LATEST_TAG }}

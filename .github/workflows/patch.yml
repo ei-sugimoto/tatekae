@@ -1,0 +1,28 @@
+name: patch
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: '0'
+      - name: Create new patch version tag
+        uses: anothrNick/github-tag-action@1.39.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
+          RELEASE_BRANCHES: .*
+          WITH_V: true
