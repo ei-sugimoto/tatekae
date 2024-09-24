@@ -34,7 +34,7 @@ jobs:
           gcloud auth configure-docker
 
       - name: Build and push Docker image
-        working-directory: ./api
+        working-directory: ../../api
         run: |
           docker buildx build \
             --file api/Dockerfile.Prod \
