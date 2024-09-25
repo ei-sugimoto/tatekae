@@ -2,5 +2,4 @@ FROM node:lts
 COPY . /workspace
 WORKDIR /workspace/app
 RUN npm install -g bun
-ENV VITE_API_URL=http://localhost:8080
 
