@@ -34,14 +34,12 @@ services:
     tty: true
 
   web:
-    image: ghcr.io/ei-sugimoto/tatekae/web:latest
+    # image: ghcr.io/ei-sugimoto/tatekae/web:latest
+    image: myweb:latest
     ports:
       - "3000:80"
     volumes:
       - ./web:/workspace
-
-    environment:
-      - VITE_API_URL=http://localhost:8080
     depends_on:
       - api
       - db
