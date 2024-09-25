@@ -52,3 +52,5 @@ jobs:
           context: ./web
           file: ./web/Dockerfile.Prod
           tags: ${{ env.REGISTRY }}/${{ github.repository }}/web:latest
+          build-args: |
+            VITE_API_URL=${{ secrets.VITE_API_URL }}

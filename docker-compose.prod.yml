@@ -34,8 +34,8 @@ services:
     tty: true
 
   web:
-    # image: ghcr.io/ei-sugimoto/tatekae/web:latest
-    image: myweb:latest
+    image: ghcr.io/ei-sugimoto/tatekae/web:latest
+    # image: myweb:latest
     ports:
       - "3000:80"
     volumes:
