@@ -56,24 +56,11 @@ func (r *Router) Run() {
 		Handler: cors.AllowAll().Handler(h2c.NewHandler(r.Engine, &http2.Server{})),
 	}
 
-	if env := os.Getenv("ENV"); env == "" {
-		panic("ENV is not set")
-	}
-
-	if os.Getenv("ENV") == "local" {
-		go func() {
-			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				log.Fatal(err)
-			}
-		}()
-	} else {
-		server.Addr = ":443"
-		go func() {
-			if err := server.ListenAndServeTLS("/etc/ssl/certs/cert.pem", "/etc/ssl/private/key.pem"); err != nil && err != http.ErrServerClosed {
-				log.Fatal(err)
-			}
-		}()
-	}
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal(err)
+		}
+	}()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

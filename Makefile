@@ -39,3 +39,9 @@ down-vol:
 .PHONY: prod-up
 prod-up:
 	docker compose -f docker-compose.prod.yml up --build
+
+.PHONY: prod-image-build
+prod-image-build:
+	cd api && docker build -f Dockerfile.Prod -t api-image:latest .
+	cd web && docker build -f Dockerfile.Prod -t web-image:latest .
+	make prod-up

@@ -7,11 +7,7 @@ import {
 import { createConnectTransport } from '@connectrpc/connect-web';
 import { getCookie } from './utils/cookie';
 
-const baseUrl = import.meta.env.VITE_API_URL;
-
-if (!baseUrl) {
-  throw new Error('APIURL is not defined');
-}
+const baseUrl = 'https://tatekae-api.ei-sugimoto.uk';
 
 const authInterceptor: Interceptor = (next) => async (request) => {
   const token = getCookie('token');

@@ -12,12 +12,12 @@ services:
       - db:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
 
   api:
-    image: ghcr.io/ei-sugimoto/tatekae/api:latest
+    image: api-image:latest
     ports:
       - "8080:8080"
     volumes:
@@ -34,7 +34,7 @@ services:
     tty: true
 
   web:
-    image: ghcr.io/ei-sugimoto/tatekae/web:latest
+    image: web-image:latest
     # image: myweb:latest
     ports:
       - "3000:80"
@@ -46,6 +46,25 @@ services:
     tty: true
     working_dir: /workspace/app
     stdin_open: true
-
+  
+  # tunnelweb:
+  #   image: cloudflare/cloudflared:latest
+  #   network_mode: host
+  #   command:
+  #     - tunnel
+  #     - --no-autoupdate
+  #     - run
+  #   environment:
+  #     - TUNNEL_TOKEN=xxx
+    
+  # tunnelapi:
+  #   image: cloudflare/cloudflared:latest
+  #   network_mode: host
+  #   command:
+  #     - tunnel
+  #     - --no-autoupdate
+  #     - run
+  #   environment:
+  #     - TUNNEL_TOKEN=xxx
 volumes:
   db:
