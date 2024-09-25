@@ -42,6 +42,7 @@ export const LoginForm: React.FC = () => {
       return;
     }
     setCookie('token', res.token, 1);
+    setCookie('id', String(res.id), 1);
     setMe((prev) => ({ ...prev, id: res.id, name: res.username }));
     toast({
       title: 'ログイン成功',

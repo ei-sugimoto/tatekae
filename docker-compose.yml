@@ -17,7 +17,9 @@ services:
       retries: 5
 
   api:
-    image: ghcr.io/ei-sugimoto/tatekae/api:latest
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
     ports:
       - "8080:8080"
     volumes:
@@ -34,9 +36,11 @@ services:
     tty: true
 
   web:
-    image: myweb:latest
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
     ports:
-      - "3000:80"
+      - "3000:3000"
     volumes:
       - ./web:/workspace
 
@@ -48,7 +52,7 @@ services:
       - db
     tty: true
     working_dir: /workspace/app
-    #command: bash -c "bun install && bun run dev"
+    command: bash -c "bun install && bun run dev"
     stdin_open: true
 
 volumes:
