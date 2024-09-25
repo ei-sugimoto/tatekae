@@ -3,6 +3,7 @@ FROM  golang:1.23.1-bullseye AS builder
 WORKDIR /app
 
 EXPOSE 8080
+ENV ENV=prod
 
 RUN --mount=source=go.mod,target=go.mod \
     --mount=source=go.sum,target=go.sum \
@@ -10,6 +11,11 @@ RUN --mount=source=go.mod,target=go.mod \
 
 RUN --mount=source=.,target=. \
     go build -o /go/bin/main .
+
+RUN apt-get update && apt-get install -y openssl && \
+    openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/private/server.key -out /etc/ssl/certs/server.crt -days 365 -nodes -subj "/C=JP/ST=Tokyo/L=Shibuya/O=My Company/OU=IT Department/CN=localhost/emailAddress=admin@example.com"
+
+
 
 FROM gcr.io/distroless/cc:latest
 

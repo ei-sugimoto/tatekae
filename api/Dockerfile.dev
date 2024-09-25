@@ -3,6 +3,7 @@ FROM  golang:1.23.1-bullseye
 WORKDIR /app
 
 EXPOSE 8080
+ENV ENV=local
 
 COPY . .
 
