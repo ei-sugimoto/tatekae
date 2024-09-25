@@ -12,9 +12,7 @@ services:
       - db:/var/lib/mysql
 
   api:
-    build:
-      context: ./api
-      dockerfile: Dockerfile.dev
+    image: ghcr.io/ei-sugimoto/tatekae/api:latest
     ports:
       - "8080:8080"
     volumes:
@@ -29,9 +27,7 @@ services:
       - db
 
   web:
-    build:
-      context: ./web
-      dockerfile: Dockerfile.dev
+    image: ghcr.io/ei-sugimoto/tatekae/web:latest
     ports:
       - "3000:3000"
     volumes:
