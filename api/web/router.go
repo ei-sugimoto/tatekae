@@ -67,6 +67,7 @@ func (r *Router) Run() {
 			}
 		}()
 	} else {
+		server.Addr = ":443"
 		go func() {
 			if err := server.ListenAndServeTLS("/etc/ssl/certs/server.crt", "/etc/ssl/private/server.key"); err != nil && err != http.ErrServerClosed {
 				log.Fatal(err)
