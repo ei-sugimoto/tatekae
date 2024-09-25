@@ -24,5 +24,7 @@ COPY --from=builder /workspace/app/dist /usr/share/nginx/html
 # コンテナを公開するポート
 EXPOSE 80
 
+ENV VITE_API_URL=http://api:8080
+
 # Nginx を起動
 CMD ["sh", "-c", "nginx -g 'daemon off;'"]
