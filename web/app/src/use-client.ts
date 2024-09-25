@@ -7,7 +7,11 @@ import {
 import { createConnectTransport } from '@connectrpc/connect-web';
 import { getCookie } from './utils/cookie';
 
-const baseUrl = 'http://localhost:8080';
+const baseUrl = import.meta.env.VITE_API_URL;
+
+if (!baseUrl) {
+  throw new Error('APIURL is not defined');
+}
 
 const authInterceptor: Interceptor = (next) => async (request) => {
   const token = getCookie('token');

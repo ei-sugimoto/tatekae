@@ -36,3 +36,6 @@ up-build:
 .PHONY: down-vol
 down-vol:
 	docker compose down -v
+.PHONY: prod-up
+prod-up:
+	docker compose -f docker-compose.prod.yml up --build

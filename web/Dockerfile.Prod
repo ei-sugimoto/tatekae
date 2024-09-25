@@ -9,6 +9,9 @@ WORKDIR /workspace/app
 
 RUN bun install
 
+ENV VITE_API_URL=http://localhost:8080
+
+
 RUN bun run build
 
 FROM nginx
