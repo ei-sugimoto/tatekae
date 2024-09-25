@@ -37,7 +37,7 @@ services:
     image: ghcr.io/ei-sugimoto/tatekae/web:latest
     # image: myweb:latest
     ports:
-      - "3000:443"
+      - "3000:80"
     volumes:
       - ./web:/workspace
     depends_on:
