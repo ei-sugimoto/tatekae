@@ -5,11 +5,12 @@ import {
   PromiseClient,
 } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-web';
+import { getCookie } from './utils/cookie';
 
 const baseUrl = 'http://localhost:8080';
 
 const authInterceptor: Interceptor = (next) => async (request) => {
-  const token = localStorage.getItem('token');
+  const token = getCookie('token');
   if (token) {
     request.header.set('Authorization', `Bearer ${token}`);
   }

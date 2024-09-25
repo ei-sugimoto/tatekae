@@ -10,6 +10,11 @@ services:
       - "3306:3306"
     volumes:
       - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     image: ghcr.io/ei-sugimoto/tatekae/api:latest
@@ -24,12 +29,14 @@ services:
       - DB_NAME=mydb
       - DB_PORT=3306
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    tty: true
 
   web:
-    image: ghcr.io/ei-sugimoto/tatekae/web:latest
+    image: myweb:latest
     ports:
-      - "3000:3000"
+      - "3000:80"
     volumes:
       - ./web:/workspace
 
@@ -41,7 +48,7 @@ services:
       - db
     tty: true
     working_dir: /workspace/app
-    command: bash -c "bun install && bun run dev"
+    #command: bash -c "bun install && bun run dev"
     stdin_open: true
 
 volumes:

@@ -15,6 +15,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useSetAtom } from 'jotai';
 import { MeAtom } from '../utils/meAtom';
+import { setCookie } from '../utils/cookie';
 
 const RegisterForm: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -39,7 +40,7 @@ const RegisterForm: React.FC = () => {
       return;
     }
 
-    localStorage.setItem('token', res.token);
+    setCookie('token', res.token, 1);
     setMe({ id: res.id, name: res.username });
     toast({
       title: '登録成功',

@@ -17,6 +17,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useSetAtom } from 'jotai';
 import { MeAtom } from '../utils/meAtom';
+import { setCookie } from '../utils/cookie';
 
 export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -40,7 +41,7 @@ export const LoginForm: React.FC = () => {
       });
       return;
     }
-    localStorage.setItem('token', res.token);
+    setCookie('token', res.token, 1);
     setMe((prev) => ({ ...prev, id: res.id, name: res.username }));
     toast({
       title: 'ログイン成功',

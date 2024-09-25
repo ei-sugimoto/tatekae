@@ -24,4 +24,4 @@ COPY --from=builder /workspace/app/dist /usr/share/nginx/html
 EXPOSE 80
 
 # Nginx を起動
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["sh", "-c", "nginx -g 'daemon off;'"]
