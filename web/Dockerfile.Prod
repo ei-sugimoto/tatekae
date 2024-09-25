@@ -13,11 +13,6 @@ ARG VITE_API_URL
 
 ENV VITE_API_URL=$VITE_API_URL
 
-# 必要なパッケージをインストール
-RUN apt-get update && apt-get install -y openssl
-
-# 自己署名証明書と秘密鍵を生成
-RUN openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/private/server.key -out /etc/ssl/certs/server.crt -days 365 -nodes -subj "/C=JP/ST=Tokyo/L=Shibuya/O=My Company/OU=IT Department/CN=localhost/emailAddress=admin@example.com"
 
 RUN bun run build
 
@@ -30,9 +25,8 @@ COPY nginx.conf /etc/nginx/conf.d
 # ビルドしたファイルを Nginx の公開ディレクトリにコピー
 COPY --from=builder /workspace/app/dist /usr/share/nginx/html
 
-COPY --from=builder /etc/ssl/certs/server.crt /etc/ssl/private/server.key /etc/ssl/private/
 # コンテナを公開するポート
-EXPOSE 443
+EXPOSE 80
 
 
 # Nginx を起動
